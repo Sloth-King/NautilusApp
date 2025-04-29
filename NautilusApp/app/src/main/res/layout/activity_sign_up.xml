@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SignUpActivity"
+    android:background="@color/background">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="130dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="4dp"
+        android:contentDescription="Nautilus Logo"
+        android:src="@drawable/nautilus_removebg_preview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.985"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        style="@style/Theme.NautilusApp.TitleText"
+        android:id="@+id/NautilusName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="28sp"
+        android:text="NAUTILUS"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imageView" />
+
+    <TextView
+        style="@style/Theme.NautilusApp.TitleText"
+        android:id="@+id/LogInText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:text="Sign up"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imageView" />
+
+    <TextView
+        style="@style/Theme.NautilusApp.TextStyle"
+        android:id="@+id/firstNameLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:text="First Name"
+        android:textSize="16sp"
+        android:textColor="@color/button_color"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/LogInText" />
+
+    <EditText
+        style="@style/Theme.NautilusApp.EditText"
+        android:id="@+id/firstNameInput"
+        android:hint="Enter first name"
+        android:inputType="textPersonName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/firstNameLabel" />
+
+    <TextView
+        style="@style/Theme.NautilusApp.TextStyle"
+        android:id="@+id/lastNameLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginStart="16dp"
+        android:text="Last Name"
+        android:textSize="16sp"
+        android:textColor="@color/button_color"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/firstNameInput" />
+
+    <EditText
+        style="@style/Theme.NautilusApp.EditText"
+        android:id="@+id/lastNameInput"
+        android:hint="Enter last name"
+        android:inputType="textPersonName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lastNameLabel" />
+
+    <TextView
+        style="@style/Theme.NautilusApp.TextStyle"
+        android:id="@+id/emailLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginStart="16dp"
+        android:text="Email"
+        android:textSize="16sp"
+        android:textColor="@color/button_color"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lastNameInput" />
+
+    <EditText
+        style="@style/Theme.NautilusApp.EditText"
+        android:id="@+id/emailInput"
+        android:hint="Enter email"
+        android:inputType="textEmailAddress"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/emailLabel" />
+
+    <TextView
+        style="@style/Theme.NautilusApp.TextStyle"
+        android:id="@+id/passwordLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginStart="16dp"
+        android:text="Password"
+        android:textSize="16sp"
+        android:textColor="@color/button_color"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/emailInput" />
+
+    <EditText
+        style="@style/Theme.NautilusApp.EditText"
+        android:id="@+id/passwordInput"
+        android:hint="Enter password"
+        android:inputType="textPassword"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/passwordLabel" />
+
+    <TextView
+        style="@style/Theme.NautilusApp.TextStyle"
+        android:id="@+id/birthdayLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginStart="16dp"
+        android:text="Birthday"
+        android:textSize="16sp"
+        android:textColor="@color/button_color"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/passwordInput" />
+
+    <EditText
+        style="@style/Theme.NautilusApp.EditText"
+        android:id="@+id/birthdayInput"
+        android:hint="Enter birthday"
+        android:inputType="date"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/birthdayLabel" />
+
+    <TextView
+        style="@style/Theme.NautilusApp.TextStyle"
+        android:id="@+id/universityLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginStart="16dp"
+        android:text="University"
+        android:textSize="16sp"
+        android:textColor="@color/button_color"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/birthdayInput" />
+
+    <EditText
+        style="@style/Theme.NautilusApp.EditText"
+        android:id="@+id/universityInput"
+        android:hint="Enter university"
+        android:inputType="text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/universityLabel" />
+
+    <Button
+        android:id="@+id/submitButton"
+        style="@style/Theme.NautilusApp.NautilusButton"
+        android:text="Submit"
+        android:layout_marginTop="50dp"
+        app:backgroundTint="@null"
+        app:layout_constraintTop_toBottomOf="@id/universityInput"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

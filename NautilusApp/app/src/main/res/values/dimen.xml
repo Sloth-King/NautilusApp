@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lil file to have all the sizes and stuff in one place -->
+<resources>
+    <dimen name="nautilusButtonTextSize">20sp</dimen>
+</resources>
