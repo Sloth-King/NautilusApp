@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Lil file to have all the sizes and stuff in one place -->
 <resources>
-    <dimen name="nautilusButtonTextSize">20sp</dimen>
+    <dimen name="nautilusButtonTextSize">12sp</dimen>
+    <dimen name="nautilusTextSize">12sp</dimen>
+    <dimen name="nautilusTitleSize">38sp</dimen>
+    <dimen name="nautilusButtonPadding">0dp</dimen>
+    <dimen name="nautilusButtonWidth">230dp</dimen>
+    <dimen name="nautilusButtonHeight">48dp</dimen>
 </resources>

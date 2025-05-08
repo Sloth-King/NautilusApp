@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".HomeActivity"
+    android:background="@color/background">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="184dp"
+        android:layout_height="158dp"
+        android:src="@drawable/nautilus_removebg_preview"
+        android:contentDescription="Nautilus Logo"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        style="@style/Theme.NautilusApp.TitleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NAUTILUS"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/imageView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/loginButton"
+        style="@style/Theme.NautilusApp.NautilusButton"
+        android:text="Log In"
+        app:backgroundTint="@null"
+        app:layout_constraintTop_toBottomOf="@id/imageView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="100dp" />
+
+    <Button
+        android:id="@+id/signUpButton"
+        style="@style/Theme.NautilusApp.NautilusButton"
+        android:text="Sign Up"
+        app:backgroundTint="@null"
+        app:layout_constraintTop_toBottomOf="@id/loginButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <View
+        android:id="@+id/bottomRectangle"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/button_color"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.25" />
+
+    <TextView
+        android:id="@+id/aboutUsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="About Us"
+        android:textColor="@color/button_text_color"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="@id/bottomRectangle"
+        app:layout_constraintStart_toStartOf="@id/bottomRectangle"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+        android:id="@+id/aboutUsBody"
+        style="@style/Theme.NautilusApp.TextStyle"
+        android:layout_width="166dp"
+        android:layout_height="84dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:text="Here we can write some interesting information about the team, the labs we work with, the project...."
+        android:textColor="@color/button_text_color"
+        app:layout_constraintEnd_toStartOf="@id/contactTitle"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@id/aboutUsTitle"
+        app:layout_constraintTop_toBottomOf="@id/aboutUsTitle" />
+
+    <TextView
+        android:id="@+id/contactTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Contact"
+        android:textColor="@color/button_text_color"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="@id/aboutUsTitle"
+        app:layout_constraintEnd_toEndOf="@id/bottomRectangle"
+        android:layout_marginEnd="16dp" />
+
+    <TextView
+        android:id="@+id/contactBody"
+        style="@style/Theme.NautilusApp.TextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:text="Mail : mail@mail.com \nTel : +961 123 456 78 \nFAQ"
+        android:textColor="@color/button_text_color"
+        app:layout_constraintTop_toBottomOf="@id/contactTitle"
+        app:layout_constraintEnd_toEndOf="@id/contactTitle"
+        android:layout_marginTop="8dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

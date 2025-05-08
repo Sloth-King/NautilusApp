@@ -6,4 +6,33 @@
     </style>
 
     <style name="Theme.NautilusApp" parent="Base.Theme.NautilusApp" />
+
+    <!-- Doin the jawn to get our buttons -->
+    <style name="Theme.NautilusApp.NautilusButton">
+        <item name="android:textSize">@dimen/nautilusButtonTextSize</item>
+        <item name="android:background">@drawable/nautilus_button_drawable</item>
+        <item name="android:textColor">@color/button_text_color</item>
+        <item name="android:padding">@dimen/nautilusButtonPadding</item>
+        <item name="android:layout_width">@dimen/nautilusButtonWidth</item>
+        <item name="android:layout_height">@dimen/nautilusButtonHeight</item>
+    </style>
+
+    <style name="Theme.NautilusApp.TextStyle">
+        <item name="android:textColor">@color/text_color</item>
+    </style>
+
+    <style name="Theme.NautilusApp.TitleText">
+        <item name="android:textColor">@color/title_text_color</item>
+        <item name="android:textSize">@dimen/nautilusTitleSize</item>
+    </style>
+
+    <style name="Theme.NautilusApp.EditText">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginEnd">16dp</item>
+        <item name="android:backgroundTint">@color/button_color</item>
+    </style>
+
+
 </resources>
