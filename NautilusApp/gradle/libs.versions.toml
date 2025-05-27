@@ -25,4 +25,5 @@ androidx-sqlite-bundled-android = { group = "androidx.sqlite", name = "sqlite-bu
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-parcelize = { id = "kotlin-parcelize", version.ref = "kotlin" }
 
