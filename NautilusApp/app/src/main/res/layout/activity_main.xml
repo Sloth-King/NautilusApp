@@ -59,8 +59,8 @@
 
             <ImageView
                 android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_messages" />
+                android:layout_height="24dp"/>
+                <!--android:src="@drawable/ic_messages"--> />
 
             <TextView
                 style="@style/Theme.NautilusApp.TextStyle"
@@ -80,8 +80,8 @@
 
             <ImageView
                 android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_identification" />
+                android:layout_height="24dp" />
+                <!--android:src="@drawable/ic_identification"--> />
 
             <TextView
                 style="@style/Theme.NautilusApp.TextStyle"
@@ -101,8 +101,8 @@
 
             <ImageView
                 android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_profile" />
+                android:layout_height="24dp"/>
+                <!--android:src="@drawable/ic_profile"--> />
 
             <TextView
                 style="@style/Theme.NautilusApp.TextStyle"

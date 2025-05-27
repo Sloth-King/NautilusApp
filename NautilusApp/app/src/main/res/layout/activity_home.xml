@@ -17,8 +17,7 @@
         android:contentDescription="Nautilus Logo"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="15dp"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         style="@style/Theme.NautilusApp.TitleText"
@@ -39,7 +38,7 @@
         app:layout_constraintTop_toBottomOf="@id/imageView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="200dp" />
+        android:layout_marginTop="100dp" />
 
     <Button
         android:id="@+id/signUpButton"
@@ -59,7 +58,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.2" />
+        app:layout_constraintHeight_percent="0.25" />
 
     <TextView
         android:id="@+id/aboutUsTitle"
