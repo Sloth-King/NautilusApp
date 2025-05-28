@@ -11,4 +11,4 @@ data class FishLogData(
     val commonName: String,
     val scientificName: String,
     val description: String
-) : Parcelable
+) : Parcelable // This just makes iterable in a loop if we need to
