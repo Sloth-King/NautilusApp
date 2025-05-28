@@ -19,15 +19,31 @@ private const val ARG_PARAM2 = "param2"
  * Use the [MessagePreviewFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class MessagesFragment : Fragment() {
+class MessagePreviewFragment : Fragment() {
 
     private lateinit var storyAdapter: StoryAdapter
     private lateinit var chatAdapter: ChatPreviewAdapter
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Replace 'fragment_message_preview' with your actual layout resource name
+        return inflater.inflate(R.layout.fragment_message_preview, container, false)
+    }
+
+    private fun openFragment(fragment: Fragment) {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Dummy data
+        // TODO : Replace it with actual data from the DB
         val stories = listOf(
             StoryData("Lucieng", R.drawable.account),
             StoryData("The Goat (Andrew)", R.drawable.account),
@@ -42,7 +58,7 @@ class MessagesFragment : Fragment() {
             ChatPreviewData("John", "John", "Mon", R.drawable.account)
         )
 
-        // Set up Stories RecyclerView
+        // stories RecyclerView
         val recyclerStories = view.findViewById<RecyclerView>(R.id.storiesRecyclerView)
         recyclerStories.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         storyAdapter = StoryAdapter(stories) { story ->
@@ -50,12 +66,13 @@ class MessagesFragment : Fragment() {
         }
         recyclerStories.adapter = storyAdapter
 
-        // Set up Chats RecyclerView
+        // chat RecyclerView
         val recyclerChats = view.findViewById<RecyclerView>(R.id.chatsRecyclerView)
         recyclerChats.layoutManager = LinearLayoutManager(requireContext())
         chatAdapter = ChatPreviewAdapter(chats) { chat ->
-            Toast.makeText(requireContext(), "Clicked on chat with: ${chat.name}", Toast.LENGTH_SHORT).show()
+            openFragment(ChatFragment())
         }
         recyclerChats.adapter = chatAdapter
     }
+
 }

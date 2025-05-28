@@ -1,6 +1,8 @@
 package com.example.nautilusapp
 
 import android.os.Bundle
+import android.view.View
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -16,5 +18,29 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+    }
+    private fun openFragment(fragment: androidx.fragment.app.Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    fun openNemoLog(view: View) {
+        openFragment(LogFragment())
+    }
+
+    fun openMessages(view: View) {
+        openFragment(MessagePreviewFragment())
+    }
+
+    fun openIdentification(view: View) {
+        Toast.makeText(this, "id page not ready" , Toast.LENGTH_SHORT).show()
+        //openFragment(IdentificationFragment())
+    }
+
+    fun openProfile(view: View) {
+        Toast.makeText(this, "Profile page not ready" , Toast.LENGTH_SHORT).show()
+        //openFragment(ProfileFragment())
     }
 }

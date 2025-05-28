@@ -1,14 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@color/background"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ChatFragment">
+    android:layout_height="match_parent">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <!-- Top App Bar -->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="75dp"
+        android:padding="16dp"
+        android:background="@color/button_color">
 
-</FrameLayout>
+        <ImageView
+            android:id="@+id/chat_photo"
+            android:src="@drawable/account"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:contentDescription="Back" />
+
+        <TextView
+            android:id="@+id/chat_name"
+            style="@style/Theme.NautilusApp.TitleText"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@id/chat_photo"
+            android:layout_marginStart="12dp"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:text="Chat Name"
+            android:textColor="@color/button_text_color"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+    <!-- Messages List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/chat_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp" />
+
+    <!-- Input Area -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <EditText
+            android:id="@+id/message_input"
+            android:hint="Type a message..."
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:padding="12dp" />
+
+        <ImageView
+            android:id="@+id/button_send"
+            android:src="@drawable/send_message"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:onClick="sendMessage"
+            android:contentDescription="Send" />
+    </LinearLayout>
+</LinearLayout>

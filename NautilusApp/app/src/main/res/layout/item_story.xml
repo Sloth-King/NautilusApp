@@ -13,4 +13,10 @@
         android:src="@drawable/account"
         android:clipToOutline="true"
         android:outlineProvider="background" />
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="username"
+        android:gravity="center" />
 </LinearLayout>

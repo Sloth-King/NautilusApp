@@ -1,4 +1,6 @@
 package com.example.nautilusapp
 
-class ChatMessageData {
-}
+data class ChatMessageData(
+    val message: String,
+    val isSentByMe: Boolean
+)

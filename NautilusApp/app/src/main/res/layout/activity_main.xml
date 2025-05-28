@@ -15,7 +15,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/footer"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        />
 
     <LinearLayout
         android:id="@+id/footer"
@@ -30,11 +31,14 @@
         android:gravity="center">
 
         <LinearLayout
+            android:id="@+id/nemoLogLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:clickable="true"
+            android:onClick="openNemoLog">
 
             <ImageView
                 android:layout_width="24dp"
@@ -51,11 +55,14 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/messagesLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:clickable="true"
+            android:onClick="openMessages">
 
             <ImageView
                 android:layout_width="24dp"
@@ -72,11 +79,14 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/fishIdentificationLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:clickable="true"
+            android:onClick="openIdentification">
 
             <ImageView
                 android:layout_width="24dp"
@@ -93,11 +103,14 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/profileLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:clickable="true"
+            android:onClick="openProfile">
 
             <ImageView
                 android:layout_width="24dp"
