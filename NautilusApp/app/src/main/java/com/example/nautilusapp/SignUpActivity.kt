@@ -2,12 +2,15 @@ package com.example.nautilusapp
 
 import android.content.ContentValues
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.provider.BaseColumns
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -15,8 +18,64 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.example.nautilusapp.DatabaseContract.Simplified_User
 import com.example.nautilusapp.DatabaseContract.User
+import java.io.OutputStream
+import java.net.Socket
+import java.nio.ByteBuffer
+import java.nio.charset.Charset
+import java.util.Scanner
+import kotlin.concurrent.thread
+import kotlin.text.Charsets.US_ASCII
+
+class sendDataToServor(val socket: Socket,val writer: OutputStream,val firstName: String,val lastName: String,val password: String,val university: String) : Runnable{
+
+    fun padding(msg: String,n: Int): String {
+        if(n > 0){
+            var res = "0"+msg
+            return padding(res,n-1)
+        }
+        else{
+            return msg
+        }
+    }
+
+    override fun run(){
+        var msg = (firstName).toByteArray(US_ASCII)
+        var padding = padding(msg.size.toString(),8-msg.size.toString().length)
+        Log.d("socket",padding)
+        writer.write(padding.toByteArray((US_ASCII)))
+        writer.write(msg)
+
+        msg = (lastName).toByteArray(US_ASCII)
+        writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
+        writer.write(msg)
+
+        //TODO crypting the password
+        msg = (password).toByteArray(US_ASCII)
+        writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
+        writer.write(msg)
+
+        msg = (university).toByteArray(US_ASCII)
+        writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
+        writer.write(msg)
+
+        socket.close()
+    }
+}
 
 class SignUpActivity : AppCompatActivity() {
+    private val servorIpAdress = "192.168.43.135"
+    private val port = 5052
+
+    fun padding(msg: String,n: Int): String {
+        if(n > 0){
+            var res = "0"+msg
+            return padding(res,n-1)
+        }
+        else{
+            return msg
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -34,7 +93,7 @@ class SignUpActivity : AppCompatActivity() {
         button.setOnClickListener(View.OnClickListener {
             val firstName = findViewById<EditText>(R.id.firstNameInput)
             val lastName = findViewById<EditText>(R.id.lastNameInput)
-            val mailAdress = findViewById<EditText>(R.id.emailInput)
+            val mailAdress = findViewById<EditText>(R.id.emailInput)//TODO email size has to be between 1 and 320
             val password = findViewById<EditText>(R.id.passwordInput)
             val university = findViewById<EditText>(R.id.universityInput)
 
@@ -68,35 +127,69 @@ class SignUpActivity : AppCompatActivity() {
             else{
                 cursor.close()
                 //if they don't exist already then we need to check with the server
-                //TODO check for existing account bond to this email in server
+                thread{
+                    val socket = Socket(servorIpAdress,port)
+                    val writer: OutputStream = socket.getOutputStream()
+                    Log.d("My tag","I am here")
+                    writer.write(padding("0",3-("0").length).toByteArray(US_ASCII))
 
-                //if there is no account with that email in the server then we can create the account
+                    var msg = (mailAdress.text.toString()).toByteArray(US_ASCII)
+                    val size = msg.size.toString()
+                    Log.d("socket1",size)
+                    var padding = padding(size,8-size.length)
+                    Log.d("socket1",padding.toString())
+                    var finalSize: ByteArray = padding.toByteArray((US_ASCII))
 
-                db = dbHelper.writableDatabase
+                    writer.write(finalSize)
+                    writer.write(msg)
 
-                var values = ContentValues().apply {
-                    put(Simplified_User.COLUMN_NAME_COL1, mailAdress.text.toString())
-                    put(Simplified_User.COLUMN_NAME_COL2, firstName.text.toString())
-                    put(Simplified_User.COLUMN_NAME_COL3,lastName.text.toString())
-                    put(Simplified_User.COLUMN_NAME_COL4,university.text.toString())
+                    val reader = socket.getInputStream()
+                    val isAlreadyUsed= ByteArray(1)
+                    reader.read(isAlreadyUsed,0,1)
+
+                    if(isAlreadyUsed.toString(US_ASCII).toInt() == 1){
+                        //if there is no account with that email in the server then we can create the account
+
+
+                        db = dbHelper.writableDatabase
+
+                        var values = ContentValues().apply {
+                            put(Simplified_User.COLUMN_NAME_COL1, mailAdress.text.toString())
+                            put(Simplified_User.COLUMN_NAME_COL2, firstName.text.toString())
+                            put(Simplified_User.COLUMN_NAME_COL3,lastName.text.toString())
+                            put(Simplified_User.COLUMN_NAME_COL4,university.text.toString())
+                        }
+
+                        db.insert(Simplified_User.TABLE_NAME, null, values)
+
+                        values = ContentValues().apply {
+                            put(User.COLUMN_NAME_COL1,mailAdress.text.toString())
+                            put(User.COLUMN_NAME_COL2,password.text.toString())
+                        }
+                        db.insert(User.TABLE_NAME, null, values)
+
+                        //Then we send the data to the server
+                        val runnable = sendDataToServor(socket,writer,firstName.text.toString(),lastName.text.toString(),password.text.toString(),university.text.toString())
+                        var thread = Thread(runnable)
+                        thread.start()
+
+
+                        //We can finaly go to the next page
+                        val bundle = Bundle()
+                        bundle.putString("id", mailAdress.text.toString())
+                        val intent = Intent(this, MainActivity::class.java)
+                        intent.putExtras(bundle)
+                        startActivity(intent)
+                    }
+                    else{
+                        socket.close()
+                        val builder = AlertDialog.Builder(this)
+                        builder.setMessage("Il y a déjà un compte avec cette adresse")
+                        builder.create()
+                        builder.show()
+                    }
+
                 }
-
-                db.insert(Simplified_User.TABLE_NAME, null, values)
-
-                values = ContentValues().apply {
-                    put(User.COLUMN_NAME_COL1,mailAdress.text.toString())
-                    put(User.COLUMN_NAME_COL2,password.text.toString())
-                }
-                db.insert(User.TABLE_NAME, null, values)
-
-                //Then we send the data to the server
-
-                //We can finaly go to the next page
-                val bundle = Bundle()
-                bundle.putString("id", mailAdress.text.toString())
-                val intent = Intent(this, MainActivity::class.java)
-                intent.putExtras(bundle)
-                startActivity(intent)
             }
 
         })
