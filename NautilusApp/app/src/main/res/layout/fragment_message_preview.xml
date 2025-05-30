@@ -1,11 +1,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="@color/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <!-- Stories -->
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/storiesRecyclerView"
         android:layout_width="match_parent"
@@ -30,4 +30,15 @@
         android:layout_weight="1"
         android:padding="8dp"
         android:scrollbars="vertical" />
+
+    <!-- Button at the bottom -->
+    <Button
+        style="@style/Theme.NautilusApp.NautilusButton"
+        app:backgroundTint="@null"
+        android:id="@+id/button_new_chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+ New chat"
+        android:layout_margin="20dp"
+        android:layout_gravity="end"/>
 </LinearLayout>

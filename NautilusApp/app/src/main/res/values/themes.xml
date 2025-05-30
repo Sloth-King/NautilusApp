@@ -17,6 +17,16 @@
         <item name="android:layout_height">@dimen/nautilusButtonHeight</item>
     </style>
 
+    <style name="Theme.NautilusApp.SettingsButtons">
+        <item name="android:textSize">@dimen/nautilusButtonTextSize</item>
+        <item name="android:background">@drawable/settings_button_drawable</item>
+        <item name="android:textColor">@color/settings_button_text_color</item>
+        <item name="android:padding">@dimen/nautilusButtonPadding</item>
+        <item name="android:layout_width">@dimen/nautilusButtonWidth</item>
+        <item name="android:layout_height">@dimen/nautilusButtonHeight</item>
+
+    </style>
+
     <style name="Theme.NautilusApp.TextStyle">
         <item name="android:textColor">@color/text_color</item>
     </style>
