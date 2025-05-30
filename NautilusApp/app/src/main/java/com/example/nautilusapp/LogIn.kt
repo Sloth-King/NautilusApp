@@ -13,6 +13,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.example.nautilusapp.Common.connected
+import com.example.nautilusapp.Common.me
+import com.example.nautilusapp.Common.port
+import com.example.nautilusapp.Common.servorIpAdress
 import com.example.nautilusapp.DatabaseContract.Simplified_User
 import com.example.nautilusapp.DatabaseContract.User
 import java.io.OutputStream
@@ -21,8 +25,6 @@ import kotlin.concurrent.thread
 import kotlin.text.Charsets.US_ASCII
 
 class LogIn : AppCompatActivity() {
-    private val servorIpAdress = "192.168.43.135"
-    private val port = 5052
 
     fun padding(msg: String,n: Int): String {
         if(n > 0){
@@ -70,6 +72,13 @@ class LogIn : AppCompatActivity() {
             if (cursor.moveToNext()) {
                 //OUiiiii c'est le bon id et password
                 cursor.close()
+
+                //Update the value in Common
+                me = logIn.text.toString()
+                connected = true
+                val startServiceIntent: Intent = Intent(this, ComServer::class.java)
+                startService(startServiceIntent)
+
                 val bundle = Bundle()
                 bundle.putString("id", logIn.text.toString())
                 val intent = Intent(this, MainActivity::class.java)
@@ -119,6 +128,12 @@ class LogIn : AppCompatActivity() {
                     }
                     if(answer.toString(US_ASCII).toInt() == 0){
                         //if server sends 0 -> then your in and it sends all you can ask for all the informations
+                        //Update the value in Common
+                        me = logIn.text.toString()
+                        connected = true
+                        val startServiceIntent: Intent = Intent(this, ComServer::class.java)
+                        startService(startServiceIntent)
+
                         val bundle = Bundle()
                         bundle.putString("id", logIn.text.toString())
                         val intent = Intent(this, MainActivity::class.java)

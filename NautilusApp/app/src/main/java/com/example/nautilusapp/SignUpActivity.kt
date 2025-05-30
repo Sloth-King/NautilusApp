@@ -16,6 +16,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.example.nautilusapp.Common.connected
+import com.example.nautilusapp.Common.me
+import com.example.nautilusapp.Common.port
+import com.example.nautilusapp.Common.servorIpAdress
 import com.example.nautilusapp.DatabaseContract.Simplified_User
 import com.example.nautilusapp.DatabaseContract.User
 import java.io.OutputStream
@@ -63,8 +67,6 @@ class sendDataToServor(val socket: Socket,val writer: OutputStream,val firstName
 }
 
 class SignUpActivity : AppCompatActivity() {
-    private val servorIpAdress = "192.168.43.135"
-    private val port = 5052
 
     fun padding(msg: String,n: Int): String {
         if(n > 0){
@@ -173,6 +175,11 @@ class SignUpActivity : AppCompatActivity() {
                         var thread = Thread(runnable)
                         thread.start()
 
+                        //Update the value in Common
+                        me = mailAdress.text.toString()
+                        connected = true
+                        val startServiceIntent: Intent = Intent(this, ComServer::class.java)
+                        startService(startServiceIntent)
 
                         //We can finaly go to the next page
                         val bundle = Bundle()

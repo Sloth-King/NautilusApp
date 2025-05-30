@@ -8,6 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
+object Common{
+    var connected: Boolean = false
+    var me: String = ""
+    val servorIpAdress = "10.34.3.127"
+    val port = 5052
+}
+
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
