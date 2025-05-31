@@ -151,6 +151,7 @@ class SignUpActivity : AppCompatActivity() {
 
                     if(isAlreadyUsed.toString(US_ASCII).toInt() == 1){
                         //if there is no account with that email in the server then we can create the account
+                        Log.d("Creation Account","The account will be created")
 
 
                         db = dbHelper.writableDatabase

@@ -83,20 +83,23 @@ class MessagePreviewFragment : Fragment() {
         }
 
         var cursor = db.rawQuery(
-            "Select DISTINCT s.firstName, m.text, m.hour, d._id From Simplified_User AS s Join Talk_IN As t1 On s.mailAdress=t2.mailAdress Join Discussion as d On t1.idDiscussion=d._id Join Talk_In as t2 On t2.idDiscussion=d._id Join Message as m On m.idDiscussion=d._id Where t1.mailAdress=?" +
+            "Select DISTINCT s.firstName, m.text, m.hour, d._id From Simplified_User AS s Join Talk_IN As t1 On s.mailAdress=t2.mailAdress Join Discussion as d On t1.idDiscussion=d._id Join Talk_In as t2 On t2.idDiscussion=d._id Join Message as m On m.idDiscussion=d._id Where t1.mailAdress=? And t1.mailAdress<>t2.mailAdress " +
                     "Order By m.Date Desc, m.Hour Limit 10;",arrayOf(me),null)
 
         var chatPreview: ArrayList<ChatPreviewData> = arrayListOf()
         var cpt=0
         while (cursor.moveToNext()){
             cpt = cpt + 1
-            Log.d("CursorData",cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL2)))
+            var firstName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL2))
+            var text = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Message.COLUMN_NAME_COL1))
+            var bool: Boolean
+            bool = text.contains(" : is sending you a friend request",false)
+            Log.d("CursorData",firstName)
             chatPreview.add(ChatPreviewData(
-                cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL2)),
-                cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Message.COLUMN_NAME_COL1)),
+                firstName, text,
                 cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Message.COLUMN_NAME_COL3)),
                 R.drawable.account,
-                cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns._ID)),false))
+                cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns._ID)),bool))
         }
 
         Log.d("MessagePreview",cpt.toString())

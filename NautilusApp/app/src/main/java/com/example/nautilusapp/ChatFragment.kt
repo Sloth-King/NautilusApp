@@ -65,7 +65,8 @@ class ChatFragment(val discussion: Int,val chatName: String) : Fragment() {
                 val dbHelper = DatabaseHelper(requireContext())
                 var db = dbHelper.readableDatabase
                 //get the id of the user with whom we communicate
-                var cursor = db.rawQuery("Select mailAdress From Simplified_User As s Join Talk_in As t On s.mailAdress=t.mailAdress Where t.idDiscussion='$discussion';",null,null)
+                //var cursor = db.rawQuery("Select mailAdress From Simplified_User As s Join Talk_in As t On s.mailAdress=t.mailAdress Where t.idDiscussion='$discussion';",null,null)
+                var cursor = db.rawQuery("Select t1.mailAdress From Talk_in As t1 Join Talk_in As t2 On t2.idDiscussion=t2.idDiscussion Where t2.idDiscussion='$discussion';",null,null)
                 var stop: Boolean = false
                 var data: String = ""
                 while (cursor.moveToNext() && !(stop) ){

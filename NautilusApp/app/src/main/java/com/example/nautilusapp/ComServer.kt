@@ -105,13 +105,13 @@ class ComServer : Service(){
                     val reader =  client.getInputStream()
                     val msg= ByteArray(1)
                     reader.read(msg,0,1)
-                    //1 is friend request is received
+                    //1 friend request is received
                     //2 someone answered your friend request
                     if(msg.toString(US_ASCII).toInt() == 1){
+                        //TODO Why do I get two messages ???????
                         val dbHelper = DatabaseHelper(this)
                         val db = dbHelper.writableDatabase
 
-                        //TODO handle the friend request and put it somewhere (for exemple in the list) wait for andrew to do his shit
                         val sizeAddr = ByteArray(8)
                         reader.read(sizeAddr,0,8)
                         val mail = ByteArray(sizeAddr.toString(US_ASCII).toInt())
@@ -154,9 +154,8 @@ class ComServer : Service(){
                         }
                         db.insert(Friend.TABLE_NAME, null, values)
 
-                        //TODO ajouter le fragment de message
 
-                        var textMessage = firstName.toString(US_ASCII)+" is sending you a friend request"
+                        var textMessage = firstName.toString(US_ASCII)+" : is sending you a friend request"
                         Log.d("Message",textMessage)
                         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
                         var current = LocalDate.now().format(formatter)
