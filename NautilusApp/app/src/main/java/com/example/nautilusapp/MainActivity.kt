@@ -88,12 +88,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun openIdentification(view: View) {
-        Toast.makeText(this, "id page not ready" , Toast.LENGTH_SHORT).show()
-        //openFragment(IdentificationFragment())
+        //Toast.makeText(this, "id page not ready" , Toast.LENGTH_SHORT).show()
+        openFragment(IdentificationFragment())
     }
 
     fun openProfile(view: View) {
-        Toast.makeText(this, "Profile page not ready" , Toast.LENGTH_SHORT).show()
-        //openFragment(ProfileFragment())
+        //Toast.makeText(this, "Profile page not ready" , Toast.LENGTH_SHORT).show()
+        openFragment(ProfileFragment())
     }
 }

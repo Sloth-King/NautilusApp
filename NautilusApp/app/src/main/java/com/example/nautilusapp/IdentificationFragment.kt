@@ -1,31 +1,55 @@
 package com.example.nautilusapp
 
+import android.app.Activity
+import android.content.ContentValues
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [IdentificationFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.nautilusapp.DatabaseContract.Picture
+import com.example.nautilusapp.DatabaseContract.Simplified_User
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 class IdentificationFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+
+    private lateinit var cameraButton: ImageButton
+    private lateinit var galleryRecyclerView: RecyclerView
+    private lateinit var galleryAdapter: GalleryAdapter
+
+    private val imagePaths = mutableListOf<Any>() // Can be Int (drawable) or String (file path)
+    private var currentPhotoPath: String? = null
+
+    // database
+    val dbHelper = DatabaseHelper(requireContext())
+    var db = dbHelper.writableDatabase
+
+    // Allows us to launch the camera intent (see below)
+    private lateinit var takePictureLauncher: ActivityResultLauncher<Uri>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+
+        // Register the camera result launcher
+        takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success && currentPhotoPath != null) {
+                imagePaths.add(0, currentPhotoPath!!)
+                galleryAdapter.notifyItemInserted(0)
+            }
         }
     }
 
@@ -33,27 +57,53 @@ class IdentificationFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_identification, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment IdentificationFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            IdentificationFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        cameraButton = view.findViewById(R.id.button_open_camera)
+        galleryRecyclerView = view.findViewById(R.id.gallery_recycler_view)
+
+        cameraButton.setOnClickListener {
+            launchCamera()
+        }
+
+        // Dummy images
+        imagePaths.addAll(List(6) { R.drawable.test_fis })
+
+        galleryAdapter = GalleryAdapter(imagePaths)
+        galleryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
+        galleryRecyclerView.adapter = galleryAdapter
     }
+
+    private fun launchCamera() {
+        val photoFile = createImageFile()
+        val photoUri = FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.fileprovider",
+            photoFile
+        )
+        currentPhotoPath = photoFile.absolutePath
+        Toast.makeText(requireContext(), currentPhotoPath.toString(), Toast.LENGTH_LONG).show()
+        takePictureLauncher.launch(photoUri)
+
+        val imageByte = File(currentPhotoPath!!).readBytes() // !! for x? type
+
+        val values = ContentValues().apply {
+            put(Simplified_User.COLUMN_NAME_COL1, imageByte)
+        }
+
+        db.insert(Picture.TABLE_NAME, null, values)
+    }
+
+    private fun createImageFile(): File {
+        // use the time to create unique name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+
+        val storageDir: File = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)!! // !! to assert not null
+        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir) // return the file
+    }
+
 }
