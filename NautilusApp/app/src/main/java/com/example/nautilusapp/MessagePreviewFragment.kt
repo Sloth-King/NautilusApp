@@ -2,6 +2,7 @@ package com.example.nautilusapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.provider.BaseColumns
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -86,7 +87,8 @@ class MessagePreviewFragment : Fragment() {
                 cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL2)),
                 cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Message.COLUMN_NAME_COL1)),
                 cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Message.COLUMN_NAME_COL3)),
-                R.drawable.account))
+                R.drawable.account,
+                cursor.getInt(cursor.getColumnIndexOrThrow(BaseColumns._ID)),false))
         }
 
         Log.d("MessagePreview",cpt.toString())
@@ -107,7 +109,12 @@ class MessagePreviewFragment : Fragment() {
         val recyclerChats = view.findViewById<RecyclerView>(R.id.chatsRecyclerView)
         recyclerChats.layoutManager = LinearLayoutManager(requireContext())
         chatAdapter = ChatPreviewAdapter(chats) { chat ->
-            openFragment(ChatFragment())
+            if(chat.isFriendRequest == true){
+                openFragment(FriendRequestChatFragment())
+            }
+            else{
+                openFragment(ChatFragment(chat.id,chat.chatName))
+            }
         }
         recyclerChats.adapter = chatAdapter
 

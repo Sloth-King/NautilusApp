@@ -309,6 +309,68 @@ class ComServer : Service(){
                         db.insert(DatabaseContract.Talk_in.TABLE_NAME, null, values)
 
                     }
+                    if(msg.toString(US_ASCII).toInt() == 3){
+                        val numberOfUsers = ByteArray(2)
+                        reader.read(numberOfUsers,0,2)
+                        val mails = ArrayList<String>()
+                        for (i in 0..numberOfUsers.toString(US_ASCII).toInt() ){//we send the author in first
+                            val sizeAddr = ByteArray(8)
+                            reader.read(sizeAddr,0,8)
+                            val mail = ByteArray(sizeAddr.toString(US_ASCII).toInt())
+                            reader.read(mail,0,sizeAddr.toString(US_ASCII).toInt())
+                            Log.d("addr",mail.toString(US_ASCII))
+                            mails.add(mail.toString(US_ASCII))
+                        }
+
+                        //found the right discussion
+                        val dbHelper = DatabaseHelper(this)
+                        var db = dbHelper.readableDatabase
+                        var idDiscussion: Int
+                        if(mails.size == 1){
+                            val cursor = db.rawQuery("Select idDiscussion From Talk_in As t1 Join Talk_in As t2 On t1.idDiscussion=t2.idDiscussion " +
+                                    "Where t1.mail=$me And t2.mail=$mails.get(0)",null,null)//huuuuum c'est de la merde
+                            cursor.moveToNext()
+                            idDiscussion = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseContract.Discussion.COLUMN_NAME_COL2))
+                            cursor.close()
+                        }
+                        else{
+                            //Groups of users are not implemented yet
+                            idDiscussion = -1
+                        }
+
+                        //receive the message
+                        val size = ByteArray(8)
+                        reader.read(size,0,8)
+                        val text = ByteArray(size.toString(US_ASCII).toInt())
+                        reader.read(text,0,size.toString(US_ASCII).toInt())
+
+
+                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                        var current = LocalDate.now().format(formatter)
+                        Log.d("did it worked ??",current.toString())
+
+                        //new we try to get the hour
+                        val zoneId = systemDefault()
+                        val currentZonedDateTime = ZonedDateTime.now(zoneId)
+                        val currentTimestamp: Long = currentZonedDateTime.toInstant().toEpochMilli()
+                        Log.d("Time ?",currentTimestamp.toString())
+                        val hour = currentTimestamp.mod(3600*1000*24)/(3600*1000)+2
+                        val min = (currentTimestamp.mod(3600*1000))/(60*1000)
+                        val sec = currentTimestamp.mod(60*1000)/1000
+                        Log.d("Time ?", "$hour:$min:$sec")
+
+                        val values = ContentValues().apply {
+                            put(DatabaseContract.Message.COLUMN_NAME_COL1, text)
+                            put(DatabaseContract.Message.COLUMN_NAME_COL2, current.toString())
+                            put(DatabaseContract.Message.COLUMN_NAME_COL3, "$hour:$min:$sec")
+                            put(DatabaseContract.Message.COLUMN_NAME_COL5, idDiscussion)
+                        }
+
+                        db.insert(DatabaseContract.Message.TABLE_NAME, null, values)
+
+                        //TODO get the ChatFragment and use addMessage on the message's text to print it if the fragment is displayed
+
+                    }
                 }
             }
         }

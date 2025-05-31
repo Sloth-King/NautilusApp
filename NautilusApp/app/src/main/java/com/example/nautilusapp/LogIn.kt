@@ -119,6 +119,7 @@ class LogIn : AppCompatActivity() {
                     }
                     if(answer.toString(US_ASCII).toInt() == 0){
                         //if server sends 0 -> then your in and it sends all you can ask for all the informations
+                        //TODO get all the observations from the user and store them in the db
                         //Update the value in Common
                         me = logIn.text.toString()
                         connected = true
