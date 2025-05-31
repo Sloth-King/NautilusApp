@@ -42,8 +42,8 @@
 
             <ImageView
                 android:layout_width="24dp"
-                android:layout_height="24dp"/>
-                <!--android:src="@drawable/ic_nemo"--> />
+                android:layout_height="24dp"
+                android:src="@drawable/list"  />
 
             <TextView
                 style="@style/Theme.NautilusApp.TextStyle"
@@ -66,8 +66,8 @@
 
             <ImageView
                 android:layout_width="24dp"
-                android:layout_height="24dp"/>
-                <!--android:src="@drawable/ic_messages"--> />
+                android:layout_height="24dp"
+                android:src="@drawable/chat" />
 
             <TextView
                 style="@style/Theme.NautilusApp.TextStyle"
@@ -90,8 +90,8 @@
 
             <ImageView
                 android:layout_width="24dp"
-                android:layout_height="24dp" />
-                <!--android:src="@drawable/ic_identification"--> />
+                android:layout_height="24dp"
+                android:src="@drawable/camera"/>
 
             <TextView
                 style="@style/Theme.NautilusApp.TextStyle"
@@ -114,8 +114,8 @@
 
             <ImageView
                 android:layout_width="24dp"
-                android:layout_height="24dp"/>
-                <!--android:src="@drawable/ic_profile"--> />
+                android:layout_height="24dp"
+                android:src="@drawable/account" />
 
             <TextView
                 style="@style/Theme.NautilusApp.TextStyle"

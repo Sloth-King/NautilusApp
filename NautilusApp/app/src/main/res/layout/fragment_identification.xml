@@ -1,14 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".IdentificationFragment">
+    android:background="@color/background">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        style="@style/Theme.NautilusApp.TitleText"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Identification" />
 
-</FrameLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="7dp"
+        android:background="@color/button_color" />
+
+    <!-- Top half: Camera button -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:background="@drawable/ocean">
+        <ImageButton
+            android:id="@+id/button_open_camera"
+            android:src="@drawable/underwater_camera"
+            android:background="@drawable/nautilus_button_drawable"
+            android:layout_width="230dp"
+            android:layout_height="230dp"
+            android:contentDescription="Open Camera"
+            android:scaleType="centerInside"
+            android:padding="25dp"
+            android:layout_gravity="center"/>
+
+        <ImageView
+            android:id="@+id/test_image"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:scaleType="center"/>
+
+    </FrameLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="7dp"
+        android:background="@color/button_color" />
+
+    <!-- Bottom half: Gallery -->
+    <TextView
+        style="@style/Theme.NautilusApp.TitleText"
+        android:text="Your Gallery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/gallery_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp"
+        android:clipToPadding="false"
+        android:scrollbars="vertical" />
+
+</LinearLayout>
