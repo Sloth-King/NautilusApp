@@ -3,6 +3,7 @@ package com.example.nautilusapp
 import android.app.Service
 import android.content.ContentValues
 import android.content.Intent
+import android.database.sqlite.SQLiteConstraintException
 import android.os.Build
 import android.os.Handler
 import java.net.Socket
@@ -107,10 +108,115 @@ class ComServer : Service(){
                     //1 is friend request is received
                     //2 someone answered your friend request
                     if(msg.toString(US_ASCII).toInt() == 1){
+                        val dbHelper = DatabaseHelper(this)
+                        val db = dbHelper.writableDatabase
+
                         //TODO handle the friend request and put it somewhere (for exemple in the list) wait for andrew to do his shit
+                        val sizeAddr = ByteArray(8)
+                        reader.read(sizeAddr,0,8)
+                        val mail = ByteArray(sizeAddr.toString(US_ASCII).toInt())
+                        reader.read(mail,0,sizeAddr.toString(US_ASCII).toInt())
+                        Log.d("addr",mail.toString(US_ASCII))
+
+                        //fill the BD for a new discussion
+
+
+                        var size = ByteArray(8)
+                        reader.read(size,0,8)
+                        val firstName = ByteArray(size.toString(US_ASCII).toInt())
+                        reader.read(firstName,0,size.toString(US_ASCII).toInt())
+                        size = ByteArray(8)
+                        reader.read(size,0,8)
+                        val lastName = ByteArray(size.toString(US_ASCII).toInt())
+                        reader.read(lastName,0,size.toString(US_ASCII).toInt())
+                        size = ByteArray(8)
+                        reader.read(size,0,8)
+                        val university = ByteArray(size.toString(US_ASCII).toInt())
+                        reader.read(university,0,size.toString(US_ASCII).toInt())
+
+                        var values = ContentValues().apply {
+                            put(Simplified_User.COLUMN_NAME_COL1, mail.toString(US_ASCII))
+                            put(Simplified_User.COLUMN_NAME_COL2, firstName.toString(US_ASCII))
+                            put(Simplified_User.COLUMN_NAME_COL3,lastName.toString(US_ASCII))
+                            put(Simplified_User.COLUMN_NAME_COL4,university.toString(US_ASCII))
+                        }
+
+                        try {
+                            db.insert(Simplified_User.TABLE_NAME, null, values)
+                        }
+                        catch (e : SQLiteConstraintException){
+                            Log.d("BD error","the user already is in the database")
+                        }
+
+                        values = ContentValues().apply {
+                            put(Friend.ID1,me)
+                            put(Friend.ID2,mail.toString(US_ASCII))
+                        }
+                        db.insert(Friend.TABLE_NAME, null, values)
+
+                        //TODO ajouter le fragment de message
+
+                        var textMessage = firstName.toString(US_ASCII)+" is sending you a friend request"
+                        Log.d("Message",textMessage)
+                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                        var current = LocalDate.now().format(formatter)
+                        Log.d("did it worked ??",current.toString())
+
+                        //new we try to get the hour
+                        val zoneId = systemDefault()
+                        val currentZonedDateTime = ZonedDateTime.now(zoneId)
+                        val currentTimestamp: Long = currentZonedDateTime.toInstant().toEpochMilli()
+                        Log.d("Time ?",currentTimestamp.toString())
+                        val hour = currentTimestamp.mod(3600*1000*24)/(3600*1000)+2
+                        val min = (currentTimestamp.mod(3600*1000))/(60*1000)
+                        val sec = currentTimestamp.mod(60*1000)/1000
+                        Log.d("Time ?", "$hour:$min:$sec")
+                        values = ContentValues().apply {
+                            put(DatabaseContract.Discussion.COLUMN_NAME_COL1,firstName.toString(US_ASCII))
+                            put(DatabaseContract.Discussion.COLUMN_NAME_COL2,-1)
+                        }
+
+                        db.insert(DatabaseContract.Discussion.TABLE_NAME, null, values)
+
+                        val dbRead = dbHelper.readableDatabase
+                        var cursor = dbRead.rawQuery("Select Max(_id) From Discussion Where name='"+firstName.toString(US_ASCII)+"';",null,null)
+
+                        cursor.moveToNext()
+                        val id = cursor.getInt(cursor.getColumnIndexOrThrow("Max(_id)"))
+                        cursor.close()
+
+                        values = ContentValues().apply {
+                            put(DatabaseContract.Message.COLUMN_NAME_COL1, textMessage)
+                            put(DatabaseContract.Message.COLUMN_NAME_COL2, current.toString())
+                            put(DatabaseContract.Message.COLUMN_NAME_COL3, "$hour:$min:$sec")
+                            put(DatabaseContract.Message.COLUMN_NAME_COL5, id)
+                        }
+
+                        db.insert(DatabaseContract.Message.TABLE_NAME, null, values)
+
+                        values = ContentValues().apply{
+                            put(DatabaseContract.Talk_in.COLUMN_NAME_COL1, me)
+                            put(DatabaseContract.Talk_in.COLUMN_NAME_COL2, id)
+                        }
+
+                        db.insert(DatabaseContract.Talk_in.TABLE_NAME, null, values)
+
+                        values = ContentValues().apply{
+                            put(DatabaseContract.Talk_in.COLUMN_NAME_COL1, mail.toString(US_ASCII))
+                            put(DatabaseContract.Talk_in.COLUMN_NAME_COL2, id)
+                        }
+
+                        try{
+                            db.insert(DatabaseContract.Talk_in.TABLE_NAME, null, values)
+                        }
+                        catch (e : SQLiteConstraintException){
+                            Log.d("BD error","Can't create discussion with myself")
+                        }
+
+
+
                     }
                     if(msg.toString(US_ASCII).toInt() == 2){
-                        //TODO you change the last message to ... as added you as close friend and add the person to your close friend
 
                         val dbHelper = DatabaseHelper(this)
                         val db = dbHelper.writableDatabase

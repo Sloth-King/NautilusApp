@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.example.nautilusapp.Common.connected
 import com.example.nautilusapp.Common.me
+import com.example.nautilusapp.Common.padding
 import com.example.nautilusapp.Common.port
 import com.example.nautilusapp.Common.servorIpAdress
 import com.example.nautilusapp.DatabaseContract.Simplified_User
@@ -25,16 +26,6 @@ import kotlin.concurrent.thread
 import kotlin.text.Charsets.US_ASCII
 
 class LogIn : AppCompatActivity() {
-
-    fun padding(msg: String,n: Int): String {
-        if(n > 0){
-            var res = "0"+msg
-            return padding(res,n-1)
-        }
-        else{
-            return msg
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

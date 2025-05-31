@@ -7,13 +7,24 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nautilusapp.Common.me
+import com.example.nautilusapp.Common.padding
+import com.example.nautilusapp.Common.port
+import com.example.nautilusapp.Common.requestIdUsers
+import com.example.nautilusapp.Common.servorIpAdress
 import com.example.nautilusapp.DatabaseContract.Friend
 import com.example.nautilusapp.DatabaseContract.Talk_in
 import com.example.nautilusapp.DatabaseContract.User
+import java.io.InputStream
+import java.io.OutputStream
+import java.net.Socket
+import kotlin.concurrent.thread
+import kotlin.text.Charsets.US_ASCII
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -67,7 +78,9 @@ class MessagePreviewFragment : Fragment() {
                     "Order By m.Date Desc, m.Hour Limit 10;",arrayOf(me),null)
 
         var chatPreview: ArrayList<ChatPreviewData> = arrayListOf()
+        var cpt=0
         while (cursor.moveToNext()){
+            cpt = cpt + 1
             Log.d("CursorData",cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL2)))
             chatPreview.add(ChatPreviewData(
                 cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL2)),
@@ -75,6 +88,8 @@ class MessagePreviewFragment : Fragment() {
                 cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Message.COLUMN_NAME_COL3)),
                 R.drawable.account))
         }
+
+        Log.d("MessagePreview",cpt.toString())
 
         val chats = chatPreview.toList()
 
@@ -95,6 +110,46 @@ class MessagePreviewFragment : Fragment() {
             openFragment(ChatFragment())
         }
         recyclerChats.adapter = chatAdapter
+
+        val addFriend = getView()?.findViewById<Button>(R.id.button_new_chat)
+        addFriend?.setOnClickListener(View.OnClickListener{
+            thread{
+                val addr = requestIdUsers(me)
+
+                var client = Socket(addr,1895)
+                val writer: OutputStream = client.getOutputStream()
+                writer.write(("1").toByteArray(US_ASCII))
+
+                var msg = (me).toByteArray(US_ASCII)
+                var size = msg.size.toString()
+                var padding = padding(size, 8 - size.length)
+                var finalSize: ByteArray = padding.toByteArray((US_ASCII))
+                writer.write(finalSize)
+                writer.write(msg)
+
+                var cursor = db.rawQuery("Select firstName, LastName, university From Simplified_User Where mailAdress='$me';",null,null)
+                cursor.moveToNext()
+                val firstName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL2))
+                val lastName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL3))
+                val university = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL4))
+                cursor.close()
+
+                msg = (firstName).toByteArray(US_ASCII)
+                writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
+                writer.write(msg)
+
+                msg = (lastName).toByteArray(US_ASCII)
+                writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
+                writer.write(msg)
+
+
+                msg = (university).toByteArray(US_ASCII)
+                writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
+                writer.write(msg)
+
+                client.close()
+            }
+        })
     }
 
 }
