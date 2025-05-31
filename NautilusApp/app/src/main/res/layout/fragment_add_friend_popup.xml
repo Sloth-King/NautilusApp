@@ -1,14 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="24dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".AddFriendPopupFragment">
+    android:layout_height="wrap_content">
 
-    <!-- TODO: Update blank fragment layout -->
+    <!-- Close Button -->
+    <ImageView
+        android:id="@+id/button_close_popup"
+        android:src="@drawable/close"
+        android:layout_gravity="end"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:contentDescription="Close" />
+
+    <!-- Title -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_marginTop="8dp"
+        android:text="Add a Friend"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
-</FrameLayout>
+    <!-- Email Input -->
+    <EditText
+        android:id="@+id/edittext_friend_email"
+        android:hint="Enter friend's email"
+        android:inputType="textEmailAddress"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="48dp" />
+
+    <!-- Add Button -->
+    <Button
+        style="@style/Theme.NautilusApp.NautilusButton"
+        android:id="@+id/button_add_friend"
+        android:text="Add"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:backgroundTint="@null"/>
+
+</LinearLayout>

@@ -42,7 +42,7 @@ class MySevorSocket(val address: String,val port: Int){
     fun run(){
         val socket = Socket(address,port)
         val writer: OutputStream = socket.getOutputStream()
-        var msg = ("lucien.bouby@gmail.com").toByteArray(Charset.defaultCharset())
+        var msg = (me).toByteArray(Charset.defaultCharset())
         val size = msg.size.toString()
         var finalSize: ByteArray
         if (size.isEmpty()) finalSize = ("000").toByteArray(US_ASCII)

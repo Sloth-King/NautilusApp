@@ -74,6 +74,14 @@ class MessagePreviewFragment : Fragment() {
         val dbHelper = DatabaseHelper(requireContext())
         var db = dbHelper.readableDatabase
 
+        // Add friend button
+        val newChatButton = view.findViewById<Button>(R.id.button_new_chat)
+        newChatButton.setOnClickListener{
+            val dialog = AddFriendPopupFragment()
+            dialog.show(childFragmentManager, "AddFriendPopup")
+
+        }
+
         var cursor = db.rawQuery(
             "Select DISTINCT s.firstName, m.text, m.hour, d._id From Simplified_User AS s Join Talk_IN As t1 On s.mailAdress=t2.mailAdress Join Discussion as d On t1.idDiscussion=d._id Join Talk_In as t2 On t2.idDiscussion=d._id Join Message as m On m.idDiscussion=d._id Where t1.mailAdress=?" +
                     "Order By m.Date Desc, m.Hour Limit 10;",arrayOf(me),null)
@@ -110,7 +118,7 @@ class MessagePreviewFragment : Fragment() {
         recyclerChats.layoutManager = LinearLayoutManager(requireContext())
         chatAdapter = ChatPreviewAdapter(chats) { chat ->
             if(chat.isFriendRequest == true){
-                openFragment(FriendRequestChatFragment())
+                openFragment(FriendRequestChatFragment(chat.id,chat.chatName))
             }
             else{
                 openFragment(ChatFragment(chat.id,chat.chatName))
@@ -118,45 +126,6 @@ class MessagePreviewFragment : Fragment() {
         }
         recyclerChats.adapter = chatAdapter
 
-        val addFriend = getView()?.findViewById<Button>(R.id.button_new_chat)
-        addFriend?.setOnClickListener(View.OnClickListener{
-            thread{
-                val addr = requestIdUsers(me)
-
-                var client = Socket(addr,1895)
-                val writer: OutputStream = client.getOutputStream()
-                writer.write(("1").toByteArray(US_ASCII))
-
-                var msg = (me).toByteArray(US_ASCII)
-                var size = msg.size.toString()
-                var padding = padding(size, 8 - size.length)
-                var finalSize: ByteArray = padding.toByteArray((US_ASCII))
-                writer.write(finalSize)
-                writer.write(msg)
-
-                var cursor = db.rawQuery("Select firstName, LastName, university From Simplified_User Where mailAdress='$me';",null,null)
-                cursor.moveToNext()
-                val firstName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL2))
-                val lastName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL3))
-                val university = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL4))
-                cursor.close()
-
-                msg = (firstName).toByteArray(US_ASCII)
-                writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
-                writer.write(msg)
-
-                msg = (lastName).toByteArray(US_ASCII)
-                writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
-                writer.write(msg)
-
-
-                msg = (university).toByteArray(US_ASCII)
-                writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
-                writer.write(msg)
-
-                client.close()
-            }
-        })
     }
 
 }

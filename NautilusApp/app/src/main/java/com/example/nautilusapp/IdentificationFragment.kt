@@ -34,10 +34,6 @@ class IdentificationFragment : Fragment() {
     private val imagePaths = mutableListOf<Any>() // Can be Int (drawable) or String (file path)
     private var currentPhotoPath: String? = null
 
-    // database
-    val dbHelper = DatabaseHelper(requireContext())
-    var db = dbHelper.writableDatabase
-
     // Allows us to launch the camera intent (see below)
     private lateinit var takePictureLauncher: ActivityResultLauncher<Uri>
 
@@ -79,6 +75,10 @@ class IdentificationFragment : Fragment() {
     }
 
     private fun launchCamera() {
+        // database
+        val dbHelper = DatabaseHelper(requireContext())
+        val db = dbHelper.writableDatabase
+
         val photoFile = createImageFile()
         val photoUri = FileProvider.getUriForFile(
             requireContext(),
