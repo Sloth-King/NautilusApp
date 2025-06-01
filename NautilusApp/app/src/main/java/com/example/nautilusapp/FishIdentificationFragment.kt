@@ -21,7 +21,6 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
@@ -31,7 +30,18 @@ import android.database.sqlite.SQLiteConstraintException
 import android.media.ExifInterface
 import android.util.Log
 import com.example.nautilusapp.Common.me
+import com.example.nautilusapp.Common.padding
+import com.example.nautilusapp.Common.port
+import com.example.nautilusapp.Common.servorIpAdress
 import com.example.nautilusapp.DatabaseContract.Observation
+import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
+import java.net.Socket
+import kotlin.concurrent.thread
+import kotlin.text.Charsets.US_ASCII
+import android.content.ContentResolver
+import okhttp3.OkHttpClient
 
 
 class FishIdentificationFragment : Fragment() {
@@ -60,6 +70,7 @@ class FishIdentificationFragment : Fragment() {
         submitButton.setOnClickListener {
             val speciesName = editTextSpecies.text.toString().trim()
             if (speciesName.isNotEmpty()) {
+                Log.d("Maaaarche","Maaaaaaaaaaaaaaaaaaaaaaarche")
                 checkSpeciesWithWoRMS(speciesName)
             }
         }
@@ -80,22 +91,26 @@ class FishIdentificationFragment : Fragment() {
 
     private fun checkSpeciesWithWoRMS(name: String) {
 
-        // Initialize database TODO : figure out where to actually put this
+        // Initialize database
         val dbHelper = DatabaseHelper(requireContext())
         val db = dbHelper.writableDatabase
 
         val url = "https://www.marinespecies.org/rest/AphiaRecordsByName/$name?like=false&marine_only=true"
 
         lifecycleScope.launch {
+            Log.d("Submit Observation","Do I even get in here")
             try {
                 val client = OkHttpClient()
                 val request = Request.Builder().url(url).build()
                 val response = withContext(Dispatchers.IO) { client.newCall(request).execute() }
+                Log.d("Submit Observation","I am here")
 
                 if (response.isSuccessful) {
                     val body = response.body?.string()
+                    Log.d("Submit Observation","AAAAAAAAAAAAAAA")
                     if (!body.isNullOrEmpty() && body != "null") {
                         val jsonArray = JSONArray(body)
+                        Log.d("Submit Observation","Whereami")
                         if (jsonArray.length() > 0) {
                             val speciesObject = jsonArray.getJSONObject(0)
                             val aphiaID = speciesObject.getInt("AphiaID")
@@ -150,6 +165,50 @@ class FishIdentificationFragment : Fragment() {
                                 }
                             }
 
+                            var geoloc: StringBuilder? = StringBuilder()
+                            try {
+                                geoloc = getLatLngFromImage(requireContext(), imageUri!!)
+
+                                if (geoloc.isNullOrEmpty()) {
+                                    Log.d("Ponter", "Pointer is null")
+                                    geoloc = getCurrentLocation(requireContext())
+                                }
+                                Log.d("Geoloc",geoloc.toString())
+                            }catch (e:Exception){
+                                geoloc = getCurrentLocation(requireContext())
+                            }
+
+                            thread{
+                                val socket = Socket(servorIpAdress, port)
+                                val writer: OutputStream = socket.getOutputStream()
+
+                                var msg = (me).toByteArray(US_ASCII)
+                                var size = msg.size.toString()
+                                Log.d("socket1", size)
+                                var padding = padding(size, 3 - size.length)
+                                Log.d("socket1", padding.toString())
+                                var finalSize: ByteArray = padding.toByteArray((US_ASCII))
+                                writer.write(finalSize)
+                                writer.write(msg)
+
+                                writer.write(("1").toByteArray(US_ASCII))
+
+                                writer.write(padding(aphiaID.toString(),8 - aphiaID.toString().length).toByteArray(US_ASCII))
+                                size = padding(geoloc.toString(),8-geoloc.toString().length)
+                                writer.write(size.toByteArray(US_ASCII))
+                                writer.write(geoloc.toString().toByteArray(US_ASCII))
+
+                                //get picture
+                                val imageBytes = requireContext().contentResolver.openInputStream(imageUri!!)?.readBytes()
+
+                                var sizeByte = imageBytes?.size
+                                var sizeOfSize = padding(sizeByte.toString(),8-sizeByte.toString().length)
+                                writer.write(sizeOfSize.toByteArray(US_ASCII))
+                                writer.write(sizeByte.toString().toByteArray(US_ASCII))
+                                writer.write(imageBytes)
+
+                            }
+
                             val speciesValues = ContentValues().apply {
                                 put(Species.Aphia_Id, aphiaID)
                                 put(Species.COLUMN_NAME_COL1, scientificName)
@@ -164,17 +223,6 @@ class FishIdentificationFragment : Fragment() {
                             }
 
                             // For observation table
-                            var geoloc: StringBuilder? = StringBuilder()
-                            try {
-                                geoloc = getLatLngFromImage(requireContext(), imageUri!!)
-
-                                if (geoloc.isNullOrEmpty()) {
-                                    Log.d("Ponter", "Pointer is null")
-                                    geoloc = getCurrentLocation(requireContext())
-                                }
-                            }catch (e:Exception){
-                                geoloc = getCurrentLocation(requireContext())
-                            }
 
                             val observationValues = ContentValues().apply {
                                 put(Observation.COLUMN_NAME_COL1, geoloc.toString()) // geoloc
@@ -185,16 +233,24 @@ class FishIdentificationFragment : Fragment() {
                             errorText.visibility = View.GONE
                             Toast.makeText(requireContext(), "Valid species saved!", Toast.LENGTH_SHORT).show()
                         } else {
+                            Log.d("Submit Observation","No species found")
                             errorText.text = "Species not found. Please check the name."
                             errorText.visibility = View.VISIBLE
                         }
                     }
+                    else{
+                        Log.d("Submit Observation","Response is null")
+                        errorText.text = "Body is none"
+                        errorText.visibility = View.VISIBLE
+                    }
 
                 } else {
+                    Log.d("Submit observation","I don't even know what's wrong")
                     errorText.text = "Error fetching species. Try again."
                     errorText.visibility = View.VISIBLE
                 }
             } catch (e: Exception) {
+                Log.d("Submit observation","Ca marche paaaaaaas")
                 errorText.text = "Connection error. Please try again."
                 errorText.visibility = View.VISIBLE
                 e.printStackTrace()
