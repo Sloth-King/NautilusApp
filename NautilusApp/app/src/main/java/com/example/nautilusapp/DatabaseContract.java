@@ -5,11 +5,11 @@ import static android.provider.BaseColumns._ID;
 import android.provider.BaseColumns;
 
 public class DatabaseContract {
-    public static final  int    DATABASE_VERSION = 2;
+    public static final  int    DATABASE_VERSION = 3;
     public static final  String DATABASE_NAME = "database.db";
     private static final String Mail_Type = " Varchar(320)";
     private static final String NameType = " Varchar(40)";
-    private static final String pictureType = " LongBlob";
+    private static final String pictureType = " String";
     private static final String COMMA_SEP = ",";
 
     // To prevent someone from accidentally instantiating the contract class,

@@ -91,13 +91,17 @@ class ComServer : Service(){
     //TODO make this run every time someone connect to his account and stop every time they disconnect
     //Pour les messages non envoyés, on peut mettre un cache de 1j dans lequel ils sont stockés en attendant que l'autre type se connecte a sont compte
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("onStart",me+" ; "+connected)
+        var runnable = PingServor()
+        var thread = Thread(runnable)
+        thread.start()
+        return super.onStartCommand(intent, flags, startId)
+    }
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         /* Start up the thread running the service.  Note that we create a separate thread because the service normally runs in the process's  main thread, which we don't want
         to block.  We also make it background priority so CPU-intensive work will not disrupt our UI.*/
-        var runnable = PingServor()
-        var thread = Thread(runnable)
-        thread.start()
 
         thread{
             val server = ServerSocket(1895)

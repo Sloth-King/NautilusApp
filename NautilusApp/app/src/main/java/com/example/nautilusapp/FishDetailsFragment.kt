@@ -41,9 +41,8 @@ class FishDetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         // Fill UI with fish data
-        view.findViewById<TextView>(R.id.fish_common_name).text = fish.commonName
         view.findViewById<TextView>(R.id.fish_scientific_name).text = fish.scientificName
-        view.findViewById<ImageView>(R.id.fish_image).setImageResource(fish.imageResId)
+        view.findViewById<ImageView>(R.id.fish_image).setImageBitmap(fish.imageResId)
 
         view.findViewById<ImageView>(R.id.button_close).setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()

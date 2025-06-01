@@ -41,6 +41,17 @@
         android:layout_height="1dp"
         android:background="@color/button_color" />
 
+    <TextView
+        android:id="@+id/text_no_obs"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:textSize="@dimen/nautilusTitleSize"
+        android:text="No observations yet !"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:visibility="gone"
+        />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/log_recycler_view"
         android:layout_width="match_parent"

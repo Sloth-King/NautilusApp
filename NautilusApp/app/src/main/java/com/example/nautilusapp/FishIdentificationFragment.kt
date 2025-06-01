@@ -41,6 +41,8 @@ import java.net.Socket
 import kotlin.concurrent.thread
 import kotlin.text.Charsets.US_ASCII
 import android.content.ContentResolver
+import com.example.nautilusapp.DatabaseContract.Picture
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.OkHttpClient
 
 
@@ -54,6 +56,7 @@ class FishIdentificationFragment : Fragment() {
 
     private var imageUri: Uri? = null // Set this externally after photo capture
     private var pictureId: Long = -1
+    private var picturePath: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -84,12 +87,15 @@ class FishIdentificationFragment : Fragment() {
         imageView = view.findViewById(R.id.image_fish_photo)
         val uriString = arguments?.getString("captured_uri")
         uriString?.let {
-            val imageUri = Uri.parse(it)
+            imageUri = Uri.parse(it)
+            Log.d("ImageURI", "uri : ${imageUri.toString()}")
+            Log.d("ImageURI", "uriString : ${uriString}")
             imageView.setImageURI(imageUri)
         }
-        Log.d("ImageURI", "uri : ${imageUri.toString()}")
 
         pictureId = arguments?.getLong("captured_id")!!
+
+        picturePath = arguments?.getString("captured_path")!!
 
     }
 
@@ -169,18 +175,21 @@ class FishIdentificationFragment : Fragment() {
                                 }
                             }
 
-                            var geoloc: StringBuilder? = StringBuilder()
+                            var geoloc: StringBuilder? = null
                             try {
                                 geoloc = getLatLngFromImage(requireContext(), imageUri!!)
+                                Log.d("Location", "Initial geoloc : $geoloc")
 
                                 if (geoloc.isNullOrEmpty()) {
-                                    Log.d("Ponter", "Pointer is null")
+                                    Log.d("Location", "No EXIF location, falling back to current location")
                                     geoloc = getCurrentLocation(requireContext())
                                 }
-                                Log.d("Geoloc",geoloc.toString())
-                            }catch (e:Exception){
+                            } catch (e: Exception) {
+                                Log.d("Location", "Error reading EXIF, fallback to current location")
                                 geoloc = getCurrentLocation(requireContext())
                             }
+                            Log.d("Geoloc", geoloc.toString())
+
 
                             thread{
                                 val socket = Socket(servorIpAdress, port)
@@ -198,20 +207,32 @@ class FishIdentificationFragment : Fragment() {
                                 writer.write(("1").toByteArray(US_ASCII))
 
                                 writer.write(padding(aphiaID.toString(),8 - aphiaID.toString().length).toByteArray(US_ASCII))
-                                size = padding(geoloc.toString(),8-geoloc.toString().length)
+                                size = padding(geoloc.toString().length.toString(),8-geoloc.toString().length.toString().length)
                                 writer.write(size.toByteArray(US_ASCII))
                                 writer.write(geoloc.toString().toByteArray(US_ASCII))
 
                                 //get picture
+                                Log.d("ImageUri", "Is image uri null?? : ${imageUri}")
                                 val imageBytes = requireContext().contentResolver.openInputStream(imageUri!!)?.readBytes()
 
                                 var sizeByte = imageBytes?.size
-                                var sizeOfSize = padding(sizeByte.toString(),8-sizeByte.toString().length)
+                                var sizeOfSize = padding(sizeByte.toString().length.toString(),8-sizeByte.toString().length.toString().length)
+                                Log.d("Yo !",sizeOfSize)
                                 writer.write(sizeOfSize.toByteArray(US_ASCII))
-                                writer.write(sizeByte.toString().toByteArray(US_ASCII))
-                                writer.write(imageBytes)
+                                Log.d("Yo !",sizeByte.toString())
+                                if(sizeByte != null){
+                                    writer.write(sizeByte.toString().toByteArray(US_ASCII))
+                                    writer.write(imageBytes,0,sizeByte.toInt())
+                                }
 
                             }
+
+                            val values = ContentValues().apply {
+                                put(Picture.COLUMN_NAME_COL1, picturePath) // Store the file path instead of the image bytes
+                            }
+
+                            pictureId = db.insert(Picture.TABLE_NAME, null, values)
+
 
                             val speciesValues = ContentValues().apply {
                                 put(Species.Aphia_Id, aphiaID)
@@ -322,8 +343,10 @@ class FishIdentificationFragment : Fragment() {
                     val res = StringBuilder()
                     res.append("Latitude : ${latLong[0]}, ")
                     res.append("Longitude : ${latLong[1]}")
+                    Log.d("Location", "Res : ${res}")
                     return res
                 } else {
+                    Log.d("Location", "No location in EXIF")
                     return null // No location in EXIF
                 }
             }
@@ -331,33 +354,39 @@ class FishIdentificationFragment : Fragment() {
 
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.d("Location", "No input stream")
             return null
         }
     }
 
     // get current location from our phone
-    fun getCurrentLocation(context: Context): StringBuilder? {
+    suspend fun getCurrentLocation(context: Context): StringBuilder? = withContext(Dispatchers.Main) {
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Request permission first
-            return null
+
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.d("Location", "NO PERMISSIONS")
+            return@withContext null
         }
 
-        // Note: This is a synchronous implementation for a primarily asynchronous API
-        // In a real app, consider using callbacks or coroutines instead
-        try {
-            val locationResult = fusedLocationClient.lastLocation.result
-            if (locationResult != null) {
-                return StringBuilder().apply {
-                    append("Latitude: ${locationResult.latitude}, ")
-                    append("Longitude: ${locationResult.longitude}")
+        suspendCancellableCoroutine { cont ->
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location ->
+                    if (location != null) {
+                        val result = StringBuilder().apply {
+                            append("Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+                        }
+                        cont.resume(result, null)
+                    } else {
+                        Log.d("Location", "Location null from fusedLocation")
+                        cont.resume(null, null)
+                    }
                 }
-            }
-        } catch (e: Exception) {
-            Log.e("Location", "Error getting location", e)
+                .addOnFailureListener { e ->
+                    Log.e("Location", "Failed to get location", e)
+                    cont.resume(null, null)
+                }
         }
-        
-        return null
     }
 }
 

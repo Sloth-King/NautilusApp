@@ -164,6 +164,13 @@ class LogIn : AppCompatActivity() {
 
                         db.insert(Simplified_User.TABLE_NAME, null, values)
 
+                        values = ContentValues().apply {
+                            put(User.COLUMN_NAME_COL1,me)
+                            put(User.COLUMN_NAME_COL2,password.text.toString())
+                        }
+
+                        db.insert(User.TABLE_NAME,null,values)
+
                         val bundle = Bundle()
                         bundle.putString("id", logIn.text.toString())
                         val intent = Intent(this, MainActivity::class.java)

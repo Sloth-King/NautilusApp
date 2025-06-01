@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.nautilusapp.DatabaseContract.Picture
 import com.example.nautilusapp.DatabaseContract.Simplified_User
 import java.io.File
+import java.lang.Thread.sleep
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -80,9 +81,6 @@ class   IdentificationFragment : Fragment() {
 
     private fun launchCamera() : Uri {
         // database
-        val dbHelper = DatabaseHelper(requireContext())
-        val db = dbHelper.writableDatabase
-
         val photoFile = createImageFile()
         val photoUri = FileProvider.getUriForFile(
             requireContext(),
@@ -93,14 +91,6 @@ class   IdentificationFragment : Fragment() {
         Toast.makeText(requireContext(), currentPhotoPath.toString(), Toast.LENGTH_LONG).show()
         takePictureLauncher.launch(photoUri)
 
-        val imageByte = File(currentPhotoPath!!).readBytes() // !! for x? type
-
-        val values = ContentValues().apply {
-            put(Picture.COLUMN_NAME_COL1, imageByte)
-        }
-
-        pictureId = db.insert(Picture.TABLE_NAME, null, values)
-
         return photoUri
 
     }
@@ -109,6 +99,7 @@ class   IdentificationFragment : Fragment() {
         val bundle = Bundle().apply {
             putString("captured_uri", imageUri.toString())
             putLong("captured_id", pictureId)
+            putString("captured_path",currentPhotoPath)
         }
 
         val fragment = FishIdentificationFragment().apply {
