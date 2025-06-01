@@ -53,6 +53,7 @@ class FishIdentificationFragment : Fragment() {
     private lateinit var identifyLaterButton: Button
 
     private var imageUri: Uri? = null // Set this externally after photo capture
+    private var pictureId: Long = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -87,6 +88,9 @@ class FishIdentificationFragment : Fragment() {
             imageView.setImageURI(imageUri)
         }
         Log.d("ImageURI", "uri : ${imageUri.toString()}")
+
+        pictureId = arguments?.getLong("captured_id")!!
+
     }
 
     private fun checkSpeciesWithWoRMS(name: String) {
@@ -228,6 +232,35 @@ class FishIdentificationFragment : Fragment() {
                                 put(Observation.COLUMN_NAME_COL1, geoloc.toString()) // geoloc
                                 put(Observation.COLUMN_NAME_COL2, me) // userID (no clue how to get it)
                                 put(Observation.COLUMN_NAME_COL3, aphiaID)
+                            }
+
+                            var idObs : Long = -1
+                            try {
+                                idObs = db.insertOrThrow(Observation.TABLE_NAME, null, observationValues)
+                            }catch(e: SQLiteConstraintException){
+                                Log.d("ObservationInsert", "Insert obs problem")
+                            }
+
+                            val isInObservationValues = ContentValues().apply {
+                                put(DatabaseContract.is_in_observation.COLUMN_NAME_COL1, pictureId)
+                                put(DatabaseContract.is_in_observation.COLUMN_NAME_COL2, idObs)
+                            }
+
+                            try {
+                                db.insertOrThrow(DatabaseContract.is_in_observation.TABLE_NAME, null, isInObservationValues)
+                            }catch(e: SQLiteConstraintException){
+                                Log.d("isInObsInsert", "Insert is in obs problem")
+                            }
+
+                            val isInSpeciesValues = ContentValues().apply {
+                                put(DatabaseContract.is_in_species_page.COLUMN_NAME_COL1, pictureId)
+                                put(DatabaseContract.is_in_species_page.COLUMN_NAME_COL2, aphiaID)
+                            }
+
+                            try {
+                                db.insertOrThrow(DatabaseContract.is_in_species_page.TABLE_NAME, null, isInSpeciesValues)
+                            }catch(e: SQLiteConstraintException){
+                                Log.d("isInSpeciesInsert", "Insert is in species problem")
                             }
 
                             errorText.visibility = View.GONE

@@ -37,6 +37,7 @@ class   IdentificationFragment : Fragment() {
     // Allows us to launch the camera intent (see below)
     private lateinit var takePictureLauncher: ActivityResultLauncher<Uri>
     private var imageUri : Uri? = null
+    private var pictureId : Long = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,7 +99,7 @@ class   IdentificationFragment : Fragment() {
             put(Picture.COLUMN_NAME_COL1, imageByte)
         }
 
-        db.insert(Picture.TABLE_NAME, null, values)
+        pictureId = db.insert(Picture.TABLE_NAME, null, values)
 
         return photoUri
 
@@ -107,6 +108,7 @@ class   IdentificationFragment : Fragment() {
     fun openFishIdFragment(uri : Uri?){
         val bundle = Bundle().apply {
             putString("captured_uri", imageUri.toString())
+            putLong("captured_id", pictureId)
         }
 
         val fragment = FishIdentificationFragment().apply {
