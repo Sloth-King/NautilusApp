@@ -92,10 +92,20 @@ class IdentificationFragment : Fragment() {
         val imageByte = File(currentPhotoPath!!).readBytes() // !! for x? type
 
         val values = ContentValues().apply {
-            put(Simplified_User.COLUMN_NAME_COL1, imageByte)
+            put(Picture.COLUMN_NAME_COL1, imageByte)
         }
 
         db.insert(Picture.TABLE_NAME, null, values)
+
+        // Show the image in the next fragment
+        val fragment = FishIdentificationFragment()
+        fragment.setCapturedImage(photoUri)
+
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
+
     }
 
     private fun createImageFile(): File {
