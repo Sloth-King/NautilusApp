@@ -25,7 +25,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-class IdentificationFragment : Fragment() {
+class   IdentificationFragment : Fragment() {
 
     private lateinit var cameraButton: ImageButton
     private lateinit var galleryRecyclerView: RecyclerView
@@ -36,6 +36,7 @@ class IdentificationFragment : Fragment() {
 
     // Allows us to launch the camera intent (see below)
     private lateinit var takePictureLauncher: ActivityResultLauncher<Uri>
+    private var imageUri : Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +46,7 @@ class IdentificationFragment : Fragment() {
             if (success && currentPhotoPath != null) {
                 imagePaths.add(0, currentPhotoPath!!)
                 galleryAdapter.notifyItemInserted(0)
+                openFishIdFragment(imageUri!!)
             }
         }
     }
@@ -63,8 +65,9 @@ class IdentificationFragment : Fragment() {
         galleryRecyclerView = view.findViewById(R.id.gallery_recycler_view)
 
         cameraButton.setOnClickListener {
-            launchCamera()
+            imageUri = launchCamera()
         }
+
 
         // Dummy images
         imagePaths.addAll(List(6) { R.drawable.test_fis })
@@ -74,7 +77,7 @@ class IdentificationFragment : Fragment() {
         galleryRecyclerView.adapter = galleryAdapter
     }
 
-    private fun launchCamera() {
+    private fun launchCamera() : Uri {
         // database
         val dbHelper = DatabaseHelper(requireContext())
         val db = dbHelper.writableDatabase
@@ -97,15 +100,23 @@ class IdentificationFragment : Fragment() {
 
         db.insert(Picture.TABLE_NAME, null, values)
 
-        // Show the image in the next fragment
-        val fragment = FishIdentificationFragment()
-        fragment.setCapturedImage(photoUri)
+        return photoUri
+
+    }
+
+    fun openFishIdFragment(uri : Uri?){
+        val bundle = Bundle().apply {
+            putString("captured_uri", imageUri.toString())
+        }
+
+        val fragment = FishIdentificationFragment().apply {
+            arguments = bundle
+        }
 
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .addToBackStack(null)
             .commit()
-
     }
 
     private fun createImageFile(): File {

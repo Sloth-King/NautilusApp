@@ -1,6 +1,8 @@
 package com.example.nautilusapp
 
 import android.content.ContentValues
+import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -12,8 +14,10 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.nautilusapp.DatabaseContract.Species
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -21,6 +25,14 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
+
+import android.Manifest
+import android.database.sqlite.SQLiteConstraintException
+import android.media.ExifInterface
+import android.util.Log
+import com.example.nautilusapp.Common.me
+import com.example.nautilusapp.DatabaseContract.Observation
+
 
 class FishIdentificationFragment : Fragment() {
 
@@ -56,10 +68,14 @@ class FishIdentificationFragment : Fragment() {
             Toast.makeText(requireContext(), "Marked for later identification.", Toast.LENGTH_SHORT).show()
             // TODO: Handle storing this data for later
         }
-    }
 
-    fun setCapturedImage(uri: Uri) {
-        imageUri = uri
+        imageView = view.findViewById(R.id.image_fish_photo)
+        val uriString = arguments?.getString("captured_uri")
+        uriString?.let {
+            val imageUri = Uri.parse(it)
+            imageView.setImageURI(imageUri)
+        }
+        Log.d("ImageURI", "uri : ${imageUri.toString()}")
     }
 
     private fun checkSpeciesWithWoRMS(name: String) {
@@ -87,6 +103,8 @@ class FishIdentificationFragment : Fragment() {
                             val classificationUrl = "https://www.marinespecies.org/rest/AphiaClassificationByAphiaID/$aphiaID"
                             val environmentUrl = "https://www.marinespecies.org/rest/AphiaRecordByAphiaID/$aphiaID"
 
+                            // Get Necessary data for species table
+
                             val classificationResponse = withContext(Dispatchers.IO) {
                                 client.newCall(Request.Builder().url(classificationUrl).build()).execute()
                             }
@@ -102,14 +120,18 @@ class FishIdentificationFragment : Fragment() {
                                 val classBody = classificationResponse.body?.string()
                                 if (!classBody.isNullOrEmpty() && classBody != "null") {
                                     val classification = JSONObject(classBody)
-                                    classInfo.append("Kingdom: ${classification.optJSONObject("kingdom")?.optString("scientificname")}, ")
-                                    classInfo.append("Phylum: ${classification.optJSONObject("phylum")?.optString("scientificname")}, ")
-                                    classInfo.append("Class: ${classification.optJSONObject("class")?.optString("scientificname")}, ")
-                                    classInfo.append("Order: ${classification.optJSONObject("order")?.optString("scientificname")}, ")
-                                    classInfo.append("Family: ${classification.optJSONObject("family")?.optString("scientificname")}, ")
-                                    classInfo.append("Genus: ${classification.optJSONObject("genus")?.optString("scientificname")}")
+                                    val classificationMap = extractClassificationTree(classification)
+                                    classInfo.append("Kingdom: ${classificationMap["Kingdom"]}, ")
+                                    classInfo.append("Phylum: ${classificationMap["Phylum"]}, ")
+                                    classInfo.append("Class: ${classificationMap["Class"]}, ")
+                                    classInfo.append("Order: ${classificationMap["Order"]}, ")
+                                    classInfo.append("Family: ${classificationMap["Family"]}, ")
+                                    classInfo.append("Genus: ${classificationMap["Genus"]}, ")
+                                    classInfo.append("Species: ${classificationMap["Species"]}")
                                 }
                             }
+
+                            Log.d("KingdomLog", classInfo.toString())
 
                             // Get environment info
                             // !! Not always present data, so idk if that breaks anything tbh
@@ -118,11 +140,12 @@ class FishIdentificationFragment : Fragment() {
                                 val envBody = environmentResponse.body?.string()
                                 if (!envBody.isNullOrEmpty() && envBody != "null") {
                                     val env = JSONObject(envBody)
+                                    Log.d("JSONEnv", env.toString())
                                     val environments = mutableListOf<String>()
-                                    if (env.optBoolean("isMarine")) environments.add("Marine")
-                                    if (env.optBoolean("isBrackish")) environments.add("Brackish")
-                                    if (env.optBoolean("isFreshwater")) environments.add("Freshwater")
-                                    if (env.optBoolean("isTerrestrial")) environments.add("Terrestrial")
+                                    if (env.optInt("isMarine") == 1) environments.add("Marine")
+                                    if (env.optInt("isBrackish") == 1) environments.add("Brackish")
+                                    if (env.optInt("isFreshwater") == 1) environments.add("Freshwater")
+                                    if (env.optInt("isTerrestrial") == 1) environments.add("Terrestrial")
                                     environmentInfo = environments.joinToString(", ")
                                 }
                             }
@@ -134,7 +157,30 @@ class FishIdentificationFragment : Fragment() {
                                 put(Species.COLUMN_NAME_COL3, environmentInfo)       // environment info
                             }
 
-                            db.insert(Species.TABLE_NAME, null, speciesValues)
+                            try {
+                                db.insertOrThrow(Species.TABLE_NAME, null, speciesValues)
+                            }catch(e: SQLiteConstraintException){
+                                Log.d("SpeciesInsert", "Species already registered")
+                            }
+
+                            // For observation table
+                            var geoloc: StringBuilder? = StringBuilder()
+                            try {
+                                geoloc = getLatLngFromImage(requireContext(), imageUri!!)
+
+                                if (geoloc.isNullOrEmpty()) {
+                                    Log.d("Ponter", "Pointer is null")
+                                    geoloc = getCurrentLocation(requireContext())
+                                }
+                            }catch (e:Exception){
+                                geoloc = getCurrentLocation(requireContext())
+                            }
+
+                            val observationValues = ContentValues().apply {
+                                put(Observation.COLUMN_NAME_COL1, geoloc.toString()) // geoloc
+                                put(Observation.COLUMN_NAME_COL2, me) // userID (no clue how to get it)
+                                put(Observation.COLUMN_NAME_COL3, aphiaID)
+                            }
 
                             errorText.visibility = View.GONE
                             Toast.makeText(requireContext(), "Valid species saved!", Toast.LENGTH_SHORT).show()
@@ -151,8 +197,78 @@ class FishIdentificationFragment : Fragment() {
             } catch (e: Exception) {
                 errorText.text = "Connection error. Please try again."
                 errorText.visibility = View.VISIBLE
+                e.printStackTrace()
             }
         }
+    }
+
+    fun extractClassificationTree(json: JSONObject): Map<String, String> {
+        val classificationMap = mutableMapOf<String, String>()
+
+        var currentNode: JSONObject? = json
+
+        while (currentNode != null) {
+            val rank = currentNode.optString("rank")
+            val name = currentNode.optString("scientificname")
+
+            if (rank.isNotEmpty() && name.isNotEmpty()) {
+                classificationMap[rank] = name
+            }
+
+            currentNode = currentNode.optJSONObject("child")
+        }
+
+        return classificationMap
+    }
+
+
+    // get location from the picture
+    fun getLatLngFromImage(context: Context, imageUri: Uri): StringBuilder? {
+        try {
+            context.contentResolver.openInputStream(imageUri)?.use { inputStream ->
+                val exif = ExifInterface(inputStream)
+                val latLong = FloatArray(2)
+                
+                if (exif.getLatLong(latLong)) {
+                    val res = StringBuilder()
+                    res.append("Latitude : ${latLong[0]}, ")
+                    res.append("Longitude : ${latLong[1]}")
+                    return res
+                } else {
+                    return null // No location in EXIF
+                }
+            }
+            return null // Input stream was null
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        }
+    }
+
+    // get current location from our phone
+    fun getCurrentLocation(context: Context): StringBuilder? {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Request permission first
+            return null
+        }
+
+        // Note: This is a synchronous implementation for a primarily asynchronous API
+        // In a real app, consider using callbacks or coroutines instead
+        try {
+            val locationResult = fusedLocationClient.lastLocation.result
+            if (locationResult != null) {
+                return StringBuilder().apply {
+                    append("Latitude: ${locationResult.latitude}, ")
+                    append("Longitude: ${locationResult.longitude}")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("Location", "Error getting location", e)
+        }
+        
+        return null
     }
 }
 
