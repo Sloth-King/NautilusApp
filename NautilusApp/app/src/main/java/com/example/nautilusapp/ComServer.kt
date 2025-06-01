@@ -212,7 +212,7 @@ class ComServer : Service(){
                             Log.d("BD error","Can't create discussion with myself")
                         }
 
-
+                        client.close()
 
                     }
                     if(msg.toString(US_ASCII).toInt() == 2){
@@ -307,6 +307,8 @@ class ComServer : Service(){
 
                         db.insert(DatabaseContract.Talk_in.TABLE_NAME, null, values)
 
+                        client.close()
+
                     }
                     if(msg.toString(US_ASCII).toInt() == 3){
                         val numberOfUsers = ByteArray(2)
@@ -368,6 +370,8 @@ class ComServer : Service(){
                         db.insert(DatabaseContract.Message.TABLE_NAME, null, values)
 
                         //TODO get the ChatFragment and use addMessage on the message's text to print it if the fragment is displayed
+
+                        client.close()
 
                     }
                 }

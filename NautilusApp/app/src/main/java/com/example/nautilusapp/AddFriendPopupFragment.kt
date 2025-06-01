@@ -53,42 +53,44 @@ class AddFriendPopupFragment : DialogFragment() {
                     Log.d("Address requested",emailEditText.text.toString())
                     val addr = requestIdUsers(emailEditText.text.toString())
 
-                    var client = Socket(addr,1895)
-                    val writer: OutputStream = client.getOutputStream()
-                    writer.write(("1").toByteArray(US_ASCII))
+                    if(addr != ""){
+                        var client = Socket(addr,1895)
+                        val writer: OutputStream = client.getOutputStream()
+                        writer.write(("1").toByteArray(US_ASCII))
 
-                    var msg = (me).toByteArray(US_ASCII)
-                    var size = msg.size.toString()
-                    var padding = padding(size, 8 - size.length)
-                    var finalSize: ByteArray = padding.toByteArray((US_ASCII))
-                    writer.write(finalSize)
-                    writer.write(msg)
+                        var msg = (me).toByteArray(US_ASCII)
+                        var size = msg.size.toString()
+                        var padding = padding(size, 8 - size.length)
+                        var finalSize: ByteArray = padding.toByteArray((US_ASCII))
+                        writer.write(finalSize)
+                        writer.write(msg)
 
-                    val dbHelper = DatabaseHelper(requireContext())
-                    var db = dbHelper.readableDatabase
+                        val dbHelper = DatabaseHelper(requireContext())
+                        var db = dbHelper.readableDatabase
 
-                    var cursor = db.rawQuery("Select firstName, LastName, university From Simplified_User Where mailAdress='$me';",null,null)
-                    cursor.moveToNext()
-                    val firstName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL2))
-                    val lastName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL3))
-                    val university = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL4))
-                    cursor.close()
+                        var cursor = db.rawQuery("Select firstName, LastName, university From Simplified_User Where mailAdress='$me';",null,null)
+                        cursor.moveToNext()
+                        val firstName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL2))
+                        val lastName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL3))
+                        val university = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseContract.Simplified_User.COLUMN_NAME_COL4))
+                        cursor.close()
 
-                    msg = (firstName).toByteArray(US_ASCII)
-                    writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
-                    writer.write(msg)
+                        msg = (firstName).toByteArray(US_ASCII)
+                        writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
+                        writer.write(msg)
 
-                    msg = (lastName).toByteArray(US_ASCII)
-                    writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
-                    writer.write(msg)
+                        msg = (lastName).toByteArray(US_ASCII)
+                        writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
+                        writer.write(msg)
 
 
-                    msg = (university).toByteArray(US_ASCII)
-                    writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
-                    writer.write(msg)
+                        msg = (university).toByteArray(US_ASCII)
+                        writer.write(padding(msg.size.toString(),8-msg.size.toString().length).toByteArray((US_ASCII)))
+                        writer.write(msg)
 
-                    client.close()
-                dismiss()
+                        client.close()
+                        dismiss()
+                    }
             }}
             else {
                 Toast.makeText(requireContext(), "Please enter an email", Toast.LENGTH_SHORT).show()

@@ -5,7 +5,7 @@ import static android.provider.BaseColumns._ID;
 import android.provider.BaseColumns;
 
 public class DatabaseContract {
-    public static final  int    DATABASE_VERSION = 1;
+    public static final  int    DATABASE_VERSION = 2;
     public static final  String DATABASE_NAME = "database.db";
     private static final String Mail_Type = " Varchar(320)";
     private static final String NameType = " Varchar(40)";
@@ -132,6 +132,7 @@ public class DatabaseContract {
 
     public static abstract class Species implements BaseColumns {
         public static final String TABLE_NAME = "Species";
+        public static final String Aphia_Id = "aphia_id";
         public static final String COLUMN_NAME_COL1 = "scientific_name";
         public static final String COLUMN_NAME_COL2 = "parent";
 
@@ -140,7 +141,7 @@ public class DatabaseContract {
 
         public static final String CREATE_TABLE = "CREATE TABLE " +
                 TABLE_NAME + " (" +
-                _ID + " INTEGER PRIMARY KEY," +
+                Aphia_Id + " INTEGER PRIMARY KEY," +
                 COLUMN_NAME_COL1 + NameType + COMMA_SEP +
                 COLUMN_NAME_COL2 + " Int Not Null" + COMMA_SEP +
                 COLUMN_NAME_COL3 + " Varchar(150)" + ")";
@@ -159,7 +160,7 @@ public class DatabaseContract {
                 _ID + " INTEGER PRIMARY KEY," +
                 COLUMN_NAME_COL1 + " Varchar(50)" + COMMA_SEP +
                 COLUMN_NAME_COL2 + Mail_Type + COMMA_SEP +
-                COLUMN_NAME_COL3 + " Int Not Null" + COMMA_SEP +
+                COLUMN_NAME_COL3 + " Int" + COMMA_SEP +
                 "Foreign Key ("+ COLUMN_NAME_COL2 +") References Simplified_User(mailAdress)" + COMMA_SEP +
                 "Foreign Key ("+ COLUMN_NAME_COL3 +") References Species("+_ID+")" + ")";
         public static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;

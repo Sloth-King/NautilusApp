@@ -191,10 +191,10 @@ class SignUpActivity : AppCompatActivity() {
                     }
                     else{
                         socket.close()
-                        val builder = AlertDialog.Builder(this)
+                        /*val builder = AlertDialog.Builder(this)
                         builder.setMessage("Il y a déjà un compte avec cette adresse")
                         builder.create()
-                        builder.show()
+                        builder.show()*/
                     }
 
                 }

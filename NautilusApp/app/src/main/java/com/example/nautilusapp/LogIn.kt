@@ -102,20 +102,21 @@ class LogIn : AppCompatActivity() {
                     val reader = socket.getInputStream()
                     val answer= ByteArray(1)
                     reader.read(answer,0,1)
-
+                    socket.close()
                     if(answer.toString(US_ASCII).toInt() > 1){
-                        //if server sends 2 -> account doesn't exist
-                        val builder = AlertDialog.Builder(this)
+                        //if server sends 2 -> wrong password
+                        /*val builder = AlertDialog.Builder(this)
                         builder.setMessage("Bro WTF !? You don't even have an account")
                         builder.create()
-                        builder.show()
+                        builder.show()*/
                     }
                     if(answer.toString(US_ASCII).toInt() ==1){
-                        //if server sends 1 -> wrong password
-                        val builder = AlertDialog.Builder(this)
-                        builder.setMessage("Wrong password")
-                        builder.create()
+                        //if server sends 1 -> account doesn't exist
+                        Log.d("LogIn","Account doesn't exist")
+                        /*val builder = AlertDialog.Builder(this)
                         builder.show()
+                        builder.setMessage("Wrong password")
+                        builder.create()*/
                     }
                     if(answer.toString(US_ASCII).toInt() == 0){
                         //if server sends 0 -> then your in and it sends all you can ask for all the informations
