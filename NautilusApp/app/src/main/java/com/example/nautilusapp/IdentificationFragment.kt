@@ -92,7 +92,7 @@ class IdentificationFragment : Fragment() {
         val imageByte = File(currentPhotoPath!!).readBytes() // !! for x? type
 
         val values = ContentValues().apply {
-            put(Simplified_User.COLUMN_NAME_COL1, imageByte)
+            put(Picture.COLUMN_NAME_COL1, imageByte)
         }
 
         db.insert(Picture.TABLE_NAME, null, values)
