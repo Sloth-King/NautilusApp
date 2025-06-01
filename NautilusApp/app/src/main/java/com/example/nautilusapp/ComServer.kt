@@ -179,20 +179,13 @@ class ComServer : Service(){
                             put(DatabaseContract.Discussion.COLUMN_NAME_COL2,-1)
                         }
 
-                        db.insert(DatabaseContract.Discussion.TABLE_NAME, null, values)
-
-                        val dbRead = dbHelper.readableDatabase
-                        var cursor = dbRead.rawQuery("Select Max(_id) From Discussion Where name='"+firstName.toString(US_ASCII)+"';",null,null)
-
-                        cursor.moveToNext()
-                        val id = cursor.getInt(cursor.getColumnIndexOrThrow("Max(_id)"))
-                        cursor.close()
+                        val id = db.insert(DatabaseContract.Discussion.TABLE_NAME, null, values)
 
                         values = ContentValues().apply {
                             put(DatabaseContract.Message.COLUMN_NAME_COL1, textMessage)
                             put(DatabaseContract.Message.COLUMN_NAME_COL2, current.toString())
                             put(DatabaseContract.Message.COLUMN_NAME_COL3, "$hour:$min:$sec")
-                            put(DatabaseContract.Message.COLUMN_NAME_COL5, id)
+                            put(DatabaseContract.Message.COLUMN_NAME_COL5, id.toInt())//TODO changes not tested yet
                         }
 
                         db.insert(DatabaseContract.Message.TABLE_NAME, null, values)
@@ -279,20 +272,13 @@ class ComServer : Service(){
                             put(DatabaseContract.Discussion.COLUMN_NAME_COL2,-1)
                         }
 
-                        db.insert(DatabaseContract.Discussion.TABLE_NAME, null, values)
-
-                        val dbRead = dbHelper.readableDatabase
-                        var cursor = dbRead.rawQuery("Select Max(_id) From Discussion Where name='"+firstName.toString(US_ASCII)+"';",null,null)
-
-                        cursor.moveToNext()
-                        val id = cursor.getInt(cursor.getColumnIndexOrThrow("Max(_id)"))
-                        cursor.close()
+                        val id = db.insert(DatabaseContract.Discussion.TABLE_NAME, null, values)
 
                         values = ContentValues().apply {
                             put(DatabaseContract.Message.COLUMN_NAME_COL1, textMessage)
                             put(DatabaseContract.Message.COLUMN_NAME_COL2, current.toString())
                             put(DatabaseContract.Message.COLUMN_NAME_COL3, "$hour:$min:$sec")
-                            put(DatabaseContract.Message.COLUMN_NAME_COL5, id)
+                            put(DatabaseContract.Message.COLUMN_NAME_COL5, id.toInt())
                         }
 
                         db.insert(DatabaseContract.Message.TABLE_NAME, null, values)
