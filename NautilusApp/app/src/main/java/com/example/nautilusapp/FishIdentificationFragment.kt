@@ -1,5 +1,6 @@
 package com.example.nautilusapp
 
+import android.content.ContentValues
 import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -12,11 +13,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import com.example.nautilusapp.DatabaseContract.Species
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.json.JSONArray
+import org.json.JSONObject
 
 class FishIdentificationFragment : Fragment() {
 
@@ -75,13 +79,71 @@ class FishIdentificationFragment : Fragment() {
                 if (response.isSuccessful) {
                     val body = response.body?.string()
                     if (!body.isNullOrEmpty() && body != "null") {
-                        errorText.visibility = View.GONE
-                        Toast.makeText(requireContext(), "Valid species! Data fetched.", Toast.LENGTH_SHORT).show()
-                        // TODO: Parse and display species info
-                    } else {
-                        errorText.text = "Species not found. Please check the name."
-                        errorText.visibility = View.VISIBLE
+                        val jsonArray = JSONArray(body)
+                        if (jsonArray.length() > 0) {
+                            val speciesObject = jsonArray.getJSONObject(0)
+                            val aphiaID = speciesObject.getInt("AphiaID")
+                            val scientificName = speciesObject.getString("scientificname")
+                            val classificationUrl = "https://www.marinespecies.org/rest/AphiaClassificationByAphiaID/$aphiaID"
+                            val environmentUrl = "https://www.marinespecies.org/rest/AphiaRecordByAphiaID/$aphiaID"
+
+                            val classificationResponse = withContext(Dispatchers.IO) {
+                                client.newCall(Request.Builder().url(classificationUrl).build()).execute()
+                            }
+
+                            val environmentResponse = withContext(Dispatchers.IO) {
+                                client.newCall(Request.Builder().url(environmentUrl).build()).execute()
+                            }
+
+                            // Get class info
+                            // I'm not a biologist so i just took everything ngl
+                            val classInfo = StringBuilder()
+                            if (classificationResponse.isSuccessful) {
+                                val classBody = classificationResponse.body?.string()
+                                if (!classBody.isNullOrEmpty() && classBody != "null") {
+                                    val classification = JSONObject(classBody)
+                                    classInfo.append("Kingdom: ${classification.optJSONObject("kingdom")?.optString("scientificname")}, ")
+                                    classInfo.append("Phylum: ${classification.optJSONObject("phylum")?.optString("scientificname")}, ")
+                                    classInfo.append("Class: ${classification.optJSONObject("class")?.optString("scientificname")}, ")
+                                    classInfo.append("Order: ${classification.optJSONObject("order")?.optString("scientificname")}, ")
+                                    classInfo.append("Family: ${classification.optJSONObject("family")?.optString("scientificname")}, ")
+                                    classInfo.append("Genus: ${classification.optJSONObject("genus")?.optString("scientificname")}")
+                                }
+                            }
+
+                            // Get environment info
+                            // !! Not always present data, so idk if that breaks anything tbh
+                            var environmentInfo = ""
+                            if (environmentResponse.isSuccessful) {
+                                val envBody = environmentResponse.body?.string()
+                                if (!envBody.isNullOrEmpty() && envBody != "null") {
+                                    val env = JSONObject(envBody)
+                                    val environments = mutableListOf<String>()
+                                    if (env.optBoolean("isMarine")) environments.add("Marine")
+                                    if (env.optBoolean("isBrackish")) environments.add("Brackish")
+                                    if (env.optBoolean("isFreshwater")) environments.add("Freshwater")
+                                    if (env.optBoolean("isTerrestrial")) environments.add("Terrestrial")
+                                    environmentInfo = environments.joinToString(", ")
+                                }
+                            }
+
+                            val speciesValues = ContentValues().apply {
+                                put(Species.Aphia_Id, aphiaID)
+                                put(Species.COLUMN_NAME_COL1, scientificName)
+                                put(Species.COLUMN_NAME_COL2, classInfo.toString()) // classification string
+                                put(Species.COLUMN_NAME_COL3, environmentInfo)       // environment info
+                            }
+
+                            db.insert(Species.TABLE_NAME, null, speciesValues)
+
+                            errorText.visibility = View.GONE
+                            Toast.makeText(requireContext(), "Valid species saved!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            errorText.text = "Species not found. Please check the name."
+                            errorText.visibility = View.VISIBLE
+                        }
                     }
+
                 } else {
                     errorText.text = "Error fetching species. Try again."
                     errorText.visibility = View.VISIBLE
