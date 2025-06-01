@@ -53,7 +53,7 @@ class MessagePreviewFragment : Fragment() {
 
     private fun openFragment(fragment: Fragment) {
         parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
+            .replace(R.id.fragment_container, fragment,"Chat")
             .addToBackStack(null)
             .commit()
     }
@@ -84,7 +84,10 @@ class MessagePreviewFragment : Fragment() {
 
         var cursor = db.rawQuery(
             "Select DISTINCT s.firstName, m.text, m.hour, d._id From Simplified_User AS s Join Talk_IN As t1 On s.mailAdress=t2.mailAdress Join Discussion as d On t1.idDiscussion=d._id Join Talk_In as t2 On t2.idDiscussion=d._id Join Message as m On m.idDiscussion=d._id Where t1.mailAdress=? And t1.mailAdress<>t2.mailAdress " +
+                    "And m.Date>=(Select Max(m1.Date) From Message as m1 Where m1.idDiscussion=d._id) And m.hour>=(Select Max(m2.hour) From Message as m2 Where m2.idDiscussion=d._id And m2.hour) " +
                     "Order By m.Date Desc, m.Hour Limit 10;",arrayOf(me),null)
+
+        //Ici la requête n'est pas bonne car elle renvoie toutes les lignes avec même discussion mais chaque message différent TODO a règler
 
         var chatPreview: ArrayList<ChatPreviewData> = arrayListOf()
         var cpt=0

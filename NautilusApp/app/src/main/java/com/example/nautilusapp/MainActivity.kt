@@ -16,8 +16,8 @@ import kotlin.text.Charsets.US_ASCII
 object Common{
     var connected: Boolean = false
     var me: String = ""
-    val servorIpAdress = "192.168.43.135"
-    val port = 5055
+    val servorIpAdress = "10.34.3.127"
+    val port = 5050
 
     fun padding(msg: String,n: Int): String {
         if(n > 0){

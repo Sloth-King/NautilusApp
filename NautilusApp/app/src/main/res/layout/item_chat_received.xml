@@ -3,7 +3,7 @@
     android:id="@+id/message_text"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="start"
+    android:gravity="start"
     android:padding="12dp"
     android:textColor="@android:color/black"
     android:layout_margin="4dp"/>

@@ -99,6 +99,7 @@ class SignUpActivity : AppCompatActivity() {
             val password = findViewById<EditText>(R.id.passwordInput)
             val university = findViewById<EditText>(R.id.universityInput)
 
+            //TODO check if the email actually exist
             //before inserting the data we need to check if the id doesn't already exist
 
             // Define a projection that specifies which columns from the database we will use after the query

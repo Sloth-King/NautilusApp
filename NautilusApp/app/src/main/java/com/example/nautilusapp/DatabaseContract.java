@@ -134,8 +134,7 @@ public class DatabaseContract {
         public static final String TABLE_NAME = "Species";
         public static final String Aphia_Id = "aphia_id";
         public static final String COLUMN_NAME_COL1 = "scientific_name";
-        public static final String COLUMN_NAME_COL2 = "parent";
-
+        public static final String COLUMN_NAME_COL2 = "parent"; //TODO change the name and maybe change the size as well
         public static final String COLUMN_NAME_COL3 = "environment";
 
 

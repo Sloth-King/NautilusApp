@@ -1,5 +1,6 @@
 package com.example.nautilusapp
 
+import android.app.FragmentContainer
 import android.app.Service
 import android.content.ContentValues
 import android.content.Intent
@@ -13,6 +14,8 @@ import android.os.Message
 import android.provider.BaseColumns
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.fragment.app.FragmentContainerView
 import com.example.nautilusapp.Common.connected
 import com.example.nautilusapp.Common.me
 import com.example.nautilusapp.Common.port
@@ -40,6 +43,7 @@ import kotlin.text.Charsets.US_ASCII
 class MySevorSocket(val address: String,val port: Int){
 
     fun run(){
+        //TODO check if connected to internet
         val socket = Socket(address,port)
         val writer: OutputStream = socket.getOutputStream()
         var msg = (me).toByteArray(Charset.defaultCharset())
@@ -105,12 +109,12 @@ class ComServer : Service(){
                     val reader =  client.getInputStream()
                     val msg= ByteArray(1)
                     reader.read(msg,0,1)
+                    val dbHelper = DatabaseHelper(this)
+                    val db = dbHelper.writableDatabase
                     //1 friend request is received
                     //2 someone answered your friend request
                     if(msg.toString(US_ASCII).toInt() == 1){
                         //TODO Why do I get two messages ???????
-                        val dbHelper = DatabaseHelper(this)
-                        val db = dbHelper.writableDatabase
 
                         val sizeAddr = ByteArray(8)
                         reader.read(sizeAddr,0,8)
@@ -314,7 +318,7 @@ class ComServer : Service(){
                         val numberOfUsers = ByteArray(2)
                         reader.read(numberOfUsers,0,2)
                         val mails = ArrayList<String>()
-                        for (i in 0..numberOfUsers.toString(US_ASCII).toInt() ){//we send the author in first
+                        for (i in 0..numberOfUsers.toString(US_ASCII).toInt()-1 ){//we send the author in first
                             val sizeAddr = ByteArray(8)
                             reader.read(sizeAddr,0,8)
                             val mail = ByteArray(sizeAddr.toString(US_ASCII).toInt())
@@ -324,14 +328,13 @@ class ComServer : Service(){
                         }
 
                         //found the right discussion
-                        val dbHelper = DatabaseHelper(this)
-                        var db = dbHelper.readableDatabase
+                        val dbRead = dbHelper.readableDatabase
                         var idDiscussion: Int
                         if(mails.size == 1){
-                            val cursor = db.rawQuery("Select idDiscussion From Talk_in As t1 Join Talk_in As t2 On t1.idDiscussion=t2.idDiscussion " +
-                                    "Where t1.mail=$me And t2.mail=$mails.get(0)",null,null)//huuuuum c'est de la merde
+                            val cursor = dbRead.rawQuery("Select t1.idDiscussion From Talk_in As t1 Join Talk_in As t2 On t1.idDiscussion=t2.idDiscussion " +
+                                    "Where t1.mailAdress='$me' And t2.mailAdress='"+ mails[0] +"'",null,null)//huuuuum c'est de la merde
                             cursor.moveToNext()
-                            idDiscussion = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseContract.Discussion.COLUMN_NAME_COL2))
+                            idDiscussion = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseContract.Talk_in.COLUMN_NAME_COL2))
                             cursor.close()
                         }
                         else{
@@ -342,6 +345,7 @@ class ComServer : Service(){
                         //receive the message
                         val size = ByteArray(8)
                         reader.read(size,0,8)
+                        Log.d("ComServer",size.toString(US_ASCII))
                         val text = ByteArray(size.toString(US_ASCII).toInt())
                         reader.read(text,0,size.toString(US_ASCII).toInt())
 
@@ -361,15 +365,14 @@ class ComServer : Service(){
                         Log.d("Time ?", "$hour:$min:$sec")
 
                         val values = ContentValues().apply {
-                            put(DatabaseContract.Message.COLUMN_NAME_COL1, text)
+                            put(DatabaseContract.Message.COLUMN_NAME_COL1, text.toString(US_ASCII))
                             put(DatabaseContract.Message.COLUMN_NAME_COL2, current.toString())
                             put(DatabaseContract.Message.COLUMN_NAME_COL3, "$hour:$min:$sec")
+                            put(DatabaseContract.Message.COLUMN_NAME_COL4, mails[0])
                             put(DatabaseContract.Message.COLUMN_NAME_COL5, idDiscussion)
                         }
 
                         db.insert(DatabaseContract.Message.TABLE_NAME, null, values)
-
-                        //TODO get the ChatFragment and use addMessage on the message's text to print it if the fragment is displayed
 
                         client.close()
 

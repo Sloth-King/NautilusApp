@@ -24,7 +24,7 @@ class ChatAdapter(private val messages: List<ChatMessageData>) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val layout = if (viewType == TYPE_SENT)
-            R.layout.item_chat_sent else R.layout.item_chat_received //TODO les messages envoyés ne s'affichent pas
+            R.layout.item_chat_sent else R.layout.item_chat_received
 
         val view = LayoutInflater.from(parent.context).inflate(layout, parent, false)
         return object : RecyclerView.ViewHolder(view) {}

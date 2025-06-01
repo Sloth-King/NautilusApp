@@ -1,5 +1,6 @@
 package com.example.nautilusapp
 
+import android.content.ContentValues
 import android.content.Intent
 import android.os.Bundle
 import android.provider.BaseColumns
@@ -84,7 +85,7 @@ class LogIn : AppCompatActivity() {
                     val writer: OutputStream = socket.getOutputStream()
 
                     var msg = (logIn.text.toString()).toByteArray(US_ASCII)
-                    val size = msg.size.toString()
+                    var size = msg.size.toString()
                     Log.d("socket1", size)
                     var padding = padding(size, 3 - size.length)
                     Log.d("socket1", padding.toString())
@@ -102,13 +103,13 @@ class LogIn : AppCompatActivity() {
                     val reader = socket.getInputStream()
                     val answer= ByteArray(1)
                     reader.read(answer,0,1)
-                    socket.close()
                     if(answer.toString(US_ASCII).toInt() > 1){
                         //if server sends 2 -> wrong password
                         /*val builder = AlertDialog.Builder(this)
                         builder.setMessage("Bro WTF !? You don't even have an account")
                         builder.create()
                         builder.show()*/
+                        socket.close()
                     }
                     if(answer.toString(US_ASCII).toInt() ==1){
                         //if server sends 1 -> account doesn't exist
@@ -117,6 +118,7 @@ class LogIn : AppCompatActivity() {
                         builder.show()
                         builder.setMessage("Wrong password")
                         builder.create()*/
+                        socket.close()
                     }
                     if(answer.toString(US_ASCII).toInt() == 0){
                         //if server sends 0 -> then your in and it sends all you can ask for all the informations
@@ -126,6 +128,41 @@ class LogIn : AppCompatActivity() {
                         connected = true
                         val startServiceIntent: Intent = Intent(this, ComServer::class.java)
                         startService(startServiceIntent)
+
+                        //ask for complete info about the account
+                        writer.write(("4").toByteArray(US_ASCII))
+                        var msg = (me).toByteArray(US_ASCII)
+                        size = msg.size.toString()
+                        var padding = padding(size, 8 - size.length)
+                        var finalSize: ByteArray = padding.toByteArray((US_ASCII))
+                        writer.write(finalSize)
+                        writer.write(msg)
+
+
+                        var size = ByteArray(8)
+                        reader.read(size,0,8)
+                        val firstName = ByteArray(size.toString(US_ASCII).toInt())
+                        reader.read(firstName,0,size.toString(US_ASCII).toInt())
+                        size = ByteArray(8)
+                        reader.read(size,0,8)
+                        val lastName = ByteArray(size.toString(US_ASCII).toInt())
+                        reader.read(lastName,0,size.toString(US_ASCII).toInt())
+                        size = ByteArray(8)
+                        reader.read(size,0,8)
+                        val university = ByteArray(size.toString(US_ASCII).toInt())
+                        reader.read(university,0,size.toString(US_ASCII).toInt())
+
+                        socket.close()
+                        db = dbHelper.writableDatabase
+
+                        var values = ContentValues().apply {
+                            put(Simplified_User.COLUMN_NAME_COL1, me)
+                            put(Simplified_User.COLUMN_NAME_COL2, firstName.toString(US_ASCII))
+                            put(Simplified_User.COLUMN_NAME_COL3,lastName.toString(US_ASCII))
+                            put(Simplified_User.COLUMN_NAME_COL4,university.toString(US_ASCII))
+                        }
+
+                        db.insert(Simplified_User.TABLE_NAME, null, values)
 
                         val bundle = Bundle()
                         bundle.putString("id", logIn.text.toString())

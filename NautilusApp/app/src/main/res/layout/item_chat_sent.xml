@@ -3,9 +3,9 @@
     android:id="@+id/message_text"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="end"
+    android:gravity="end"
     android:padding="12dp"
-    android:textColor="@android:color/white"
-    android:layout_margin="60dp"/>
+    android:textColor="@android:color/black"
+    android:layout_margin="4dp"/>
 
 <!-- TODO : Get a picture for message bubble sent (and rec) -->
