@@ -96,6 +96,16 @@ class IdentificationFragment : Fragment() {
         }
 
         db.insert(Picture.TABLE_NAME, null, values)
+
+        // Show the image in the next fragment
+        val fragment = FishIdentificationFragment()
+        fragment.setCapturedImage(photoUri)
+
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
+
     }
 
     private fun createImageFile(): File {

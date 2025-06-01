@@ -48,4 +48,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     val sqlite_version = "2.5.1"
     implementation("androidx.sqlite:sqlite-ktx:$sqlite_version")
+    //for worms api
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
 }
