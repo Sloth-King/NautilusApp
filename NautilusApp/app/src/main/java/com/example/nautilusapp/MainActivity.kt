@@ -1,5 +1,6 @@
 package com.example.nautilusapp
 
+import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,7 +17,7 @@ import kotlin.text.Charsets.US_ASCII
 object Common{
     var connected: Boolean = false
     var me: String = ""
-    val servorIpAdress = ""
+    val servorIpAdress = "10.34.3.127"
     val port = 5050
 
     fun padding(msg: String,n: Int): String {
@@ -68,6 +69,22 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        // --- Add keyboard visibility listener here ---
+        val rootView = findViewById<View>(R.id.main)
+        val footer = findViewById<View>(R.id.footer)
+
+        rootView.viewTreeObserver.addOnGlobalLayoutListener {
+            val rect = Rect()
+            rootView.getWindowVisibleDisplayFrame(rect)
+
+            val screenHeight = rootView.rootView.height
+            val keypadHeight = screenHeight - rect.bottom
+
+            val isKeyboardVisible = keypadHeight > screenHeight * 0.15
+
+            footer.visibility = if (isKeyboardVisible) View.GONE else View.VISIBLE
         }
         
         openFragment(LogFragment())

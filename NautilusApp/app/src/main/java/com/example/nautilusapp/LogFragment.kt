@@ -2,6 +2,8 @@ package com.example.nautilusapp
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.util.Log
@@ -72,7 +74,8 @@ class LogFragment : Fragment() {
             Log.d("GetFishData", "Image path: $imagePath")
 
             val picBitmap = if (!imagePath.isNullOrEmpty() && File(imagePath).exists()) {
-                BitmapFactory.decodeFile(imagePath)
+                //BitmapFactory.decodeFile(imagePath) // without rotation
+                getRotatedBitmap(imagePath)
             } else {
                 Log.w("GetFishData", "Image file not found at path: $imagePath")
                 Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888) // fallback
@@ -88,6 +91,27 @@ class LogFragment : Fragment() {
         cursor.close()
         return res
     }
+
+    fun getRotatedBitmap(imagePath: String): Bitmap {
+        val originalBitmap = BitmapFactory.decodeFile(imagePath)
+
+        val exif = ExifInterface(imagePath)
+        val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+
+        val matrix = Matrix()
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+        }
+
+        return Bitmap.createBitmap(
+            originalBitmap, 0, 0,
+            originalBitmap.width, originalBitmap.height,
+            matrix, true
+        )
+    }
+
 
 
 }
